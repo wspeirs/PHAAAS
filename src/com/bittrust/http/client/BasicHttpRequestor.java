@@ -26,6 +26,7 @@ public class BasicHttpRequestor implements HttpRequestor {
 		HttpResponse response = null;
 		
 		System.out.println(request.getRequestLine());
+		System.out.println(request.getRequestLine().getUri());
 		
 		try {
 			response = client.execute(httpHost, request, context);

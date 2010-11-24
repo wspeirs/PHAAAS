@@ -3,7 +3,13 @@
  */
 package com.bittrust.authentication;
 
+import java.io.UnsupportedEncodingException;
+
+import org.apache.http.Header;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HttpContext;
 
 /**
  * @class NullAuthenticator
@@ -25,6 +31,19 @@ public class NullAuthenticator implements Authenticator {
 	@Override
 	public boolean authenticate(HttpRequest request) {
 		return result;
+	}
+
+	@Override
+	public void authenticationFailed(HttpRequest request, HttpResponse response, HttpContext context) {
+		try {
+			StringEntity entity = new StringEntity("Authentication Failed");
+			
+			response.setHeader("Content-Length", entity.getContentLength()+"");
+			response.setEntity(entity);
+			
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

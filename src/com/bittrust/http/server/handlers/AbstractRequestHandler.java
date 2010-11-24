@@ -78,16 +78,16 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	 * @param response The HTTP response
 	 * @param context The HTTP execution context
 	 */
-	public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
+	public final void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 		// attempt to authenticate the user
 		if(!authenticator.authenticate(request)) {
-			authenticateFailed(request, response, context);
+			authenticator.authenticationFailed(request, response, context);
 			return;
 		}
 		
 		// see if the user is authorized
 		if(!authorizer.authorize(request)) {
-			authorizeFailed(request, response, context);
+			authorizer.authorizationFailed(request, response, context);
 			return;
 		}
 		
@@ -103,12 +103,6 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 			copyResponse(clientResponse, response);
 	}
 	
-	//
-	// Maybe these two should be methods of their respective classes?
-	public abstract void authenticateFailed(HttpRequest request, HttpResponse response, HttpContext context);
-
-	public abstract void authorizeFailed(HttpRequest request, HttpResponse response, HttpContext context);
-
 	/**
 	 * Strip-out the headers that are not in the allowed list
 	 * @param request The request to modify
