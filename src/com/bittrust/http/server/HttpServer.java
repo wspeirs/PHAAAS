@@ -52,7 +52,12 @@ public class HttpServer implements Runnable {
 				Socket socket = serverSocket.accept();
 				
 				// start the worker for this connection
-				pool.execute(new RequestWorker(socket, resolver));
+//				pool.execute(new RequestWorker(socket, resolver));
+				
+				RequestWorker rw = new RequestWorker(socket, resolver);
+				
+				rw.run();
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

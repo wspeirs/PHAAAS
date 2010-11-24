@@ -12,5 +12,5 @@ import org.apache.http.protocol.HttpContext;
  */
 public interface HttpRequestor {
 
-	public void request(HttpRequest request, HttpResponse response, HttpContext context);
+	public HttpResponse request(HttpRequest request, HttpContext context);
 }

@@ -96,7 +96,11 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 			request = whitelistRequest(request);
 		
 		// make the request to the resource
-		httpRequestor.request(request, response, context);
+		HttpResponse clientResponse = httpRequestor.request(request, context);
+		
+		// copy over the client's response
+		if(clientResponse != null)
+			copyResponse(clientResponse, response);
 	}
 	
 	//
@@ -123,5 +127,16 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 		}
 		
 		return request;	// return the request afters stripping headers
+	}
+	
+	private void copyResponse(HttpResponse sourceResponse, HttpResponse destinationResponse) {
+		// copy over the status line
+		destinationResponse.setStatusLine(sourceResponse.getStatusLine());
+		
+		// copy over the headers
+		destinationResponse.setHeaders(sourceResponse.getAllHeaders());
+		
+		// copy over the entity
+		destinationResponse.setEntity(sourceResponse.getEntity());
 	}
 }
