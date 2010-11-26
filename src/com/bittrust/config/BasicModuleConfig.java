@@ -33,9 +33,6 @@ public class BasicModuleConfig {
 	
 	public void addParam(String param, String value) {
 		
-		System.out.println("GOT HERE: " + param + " " + value);
-		 
-		
 		if(params.containsKey(param)) {
 			params.get(param).add(value);
 		} else {
