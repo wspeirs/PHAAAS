@@ -14,8 +14,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
+import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
+import com.bittrust.http.client.BasicHttpRequestor;
 import com.bittrust.http.client.HttpRequestor;
 
 /**
@@ -28,20 +30,22 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	private Set<String> allowedHeaders;
 	private Authenticator authenticator;
 	private Authorizer authorizer;
+	private Auditor auditor;
 	private HttpRequestor httpRequestor;
 	
 	public AbstractRequestHandler() {
 		this.allowedHeaders = null;
 		this.authenticator = null;
 		this.authorizer = null;
-		this.httpRequestor = null;
+		this.httpRequestor = new BasicHttpRequestor();
 	}
 	
-	public AbstractRequestHandler(Set<String> allowedHeaders, Authenticator authenticator, Authorizer authorizer, HttpRequestor httpRequestor) {
+	public AbstractRequestHandler(Set<String> allowedHeaders, Authenticator authenticator, Authorizer authorizer, Auditor auditor) {
 		this.allowedHeaders = allowedHeaders;
 		this.authenticator = authenticator;
 		this.authorizer = authorizer;
-		this.httpRequestor = httpRequestor;
+		this.auditor = auditor;
+		this.httpRequestor = new BasicHttpRequestor();
 	}
 
 	/**
@@ -63,6 +67,10 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	 */
 	public void setAuthorizer(Authorizer authorizer) {
 		this.authorizer = authorizer;
+	}
+
+	public void setAuditor(Auditor auditor) {
+		this.auditor = auditor;
 	}
 
 	/**
