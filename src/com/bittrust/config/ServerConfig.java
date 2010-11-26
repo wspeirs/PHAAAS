@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class ServerConfig {
 	
 	private short port = 80;
+	private int threadCount = 10;
 	private ArrayList<ServiceConfig> serviceConfigs = new ArrayList<ServiceConfig>();
 	
 	public void setPort(short port) {
@@ -19,6 +20,14 @@ public class ServerConfig {
 	
 	public short getPort() {
 		return port;
+	}
+
+	public int getThreadCount() {
+		return threadCount;
+	}
+
+	public void setThreadCount(int threadCount) {
+		this.threadCount = threadCount;
 	}
 
 	public ArrayList<ServiceConfig> getServiceConfigs() {

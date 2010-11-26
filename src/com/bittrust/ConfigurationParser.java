@@ -19,9 +19,9 @@ import com.bittrust.config.ServiceConfig;
  */
 public class ConfigurationParser {
 	
-	public static void main(String[] args) {
-		Digester digester = new Digester();
-		
+	private Digester digester = new Digester();
+	
+	public ConfigurationParser() {
 		digester.setValidating(false);
 		
 		// setup the digester for the server
@@ -48,7 +48,7 @@ public class ConfigurationParser {
 		digester.addCallMethod("server/service/authorization/param", "addParam", 2);
 		digester.addCallParam("server/service/authorization/param", 0, "name");
 		digester.addCallParam("server/service/authorization/param", 1);
-		
+
 		// setup auditing
 		digester.addObjectCreate("server/service/auditing", "com.bittrust.config.BasicModuleConfig");
 		digester.addSetProperties("server/service/auditing");
@@ -56,34 +56,32 @@ public class ConfigurationParser {
 		digester.addCallMethod("server/service/auditing/param", "addParam", 2);
 		digester.addCallParam("server/service/auditing/param", 0, "name");
 		digester.addCallParam("server/service/auditing/param", 1);
+	}
+	
+	public ServerConfig parse(File configFile) {
+		ServerConfig sc = null;
 		
-
 		try {
-			File f = new File("configuration.xml");
-			
-			if(!f.exists()) {
-				System.err.println("Cannot find file: " + f.getAbsolutePath());
-				return;
+			if(!configFile.exists()) {
+				System.err.println("Cannot find file: " + configFile.getAbsolutePath());
+				return sc;
 			}
 		
-			ServerConfig sc = (ServerConfig)digester.parse(f);
-			
-			System.out.println("PORT: " + sc.getPort());
-			
-			ArrayList<ServiceConfig> scs = sc.getServiceConfigs();
-			
-			for(ServiceConfig s:scs) {
-				System.out.println("URL: " + s.getUrl());
-				
-				System.out.println("CLASS NAME: " + s.getAuthenticationConfig().getClassName());
-				System.out.println("CLASS NAME: " + s.getAuthorizationConfig().getClassName());
-				System.out.println("CLASS NAME: " + s.getAuditingConfig().getClassName());
-			}
+			// parse the config file constructing the server config object
+			sc = (ServerConfig)digester.parse(configFile);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
 			e.printStackTrace();
 		}
+		
+		return sc;
+	}
+	
+	public static void main(String[] args) {
+		
+		
+
 	}
 }

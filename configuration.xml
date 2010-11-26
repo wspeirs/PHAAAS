@@ -2,6 +2,7 @@
 
 <server port="8080">
     <service url="*">
+        <!-- need to list the allowed headers here, otherwise we just let everything through -->
         <authentication className="com.bittrust.authorization.ActiveDirectory">
           <param name="bind-name">test</param>
           <param name="bind-pass">test</param>
