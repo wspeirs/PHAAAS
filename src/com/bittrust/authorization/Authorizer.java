@@ -7,6 +7,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 
+import com.bittrust.config.BasicModuleConfig;
+
 /**
  * @interface Authorizer
  */

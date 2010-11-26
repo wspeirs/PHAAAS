@@ -5,11 +5,12 @@ package com.bittrust.authentication;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
+
+import com.bittrust.config.BasicModuleConfig;
 
 /**
  * @class NullAuthenticator
@@ -19,6 +20,10 @@ import org.apache.http.protocol.HttpContext;
 public class NullAuthenticator implements Authenticator {
 	
 	private final boolean result;
+	
+	public NullAuthenticator(BasicModuleConfig config) {
+		this.result = Boolean.parseBoolean(config.getParam("result"));
+	}
 	
 	/**
 	 * Setup the authenticator to always return one result

@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
+import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.config.ServiceConfig;
 
 /**
@@ -19,27 +20,28 @@ public class ConfiguredHandler extends AbstractRequestHandler {
 
 	private ServiceConfig serviceConfig = null;
 	
-	public ConfiguredHandler(ServiceConfig serviceConfig) {
+	public ConfiguredHandler(ServiceConfig serviceConfig) throws Exception {
 		this.serviceConfig = serviceConfig;
 		
 		try {
 			// setup the authenticator
 			Class<Authenticator> authClass = (Class<Authenticator>) Class.forName(serviceConfig.getAuthenticationConfig().getClassName());
-			Authenticator auth = (Authenticator)authClass.getConstructor(null).newInstance(null);
+			Authenticator auth = (Authenticator)authClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthenticationConfig());
 			this.setAuthenticator(auth);
 
 			// setup the authorizer
-			Class<Authorizer> authzClass = (Class<Authorizer>) Class.forName(serviceConfig.getAuthenticationConfig().getClassName());
-			Authorizer authz = (Authorizer)authzClass.getConstructor(null).newInstance(null);
+			Class<Authorizer> authzClass = (Class<Authorizer>) Class.forName(serviceConfig.getAuthorizationConfig().getClassName());
+			Authorizer authz = (Authorizer)authzClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthorizationConfig());
 			this.setAuthorizer(authz);
 
 			// setup the auditor
-			Class<Auditor> auditClass = (Class<Auditor>) Class.forName(serviceConfig.getAuthenticationConfig().getClassName());
-			Auditor audit = (Auditor)authClass.getConstructor(null).newInstance(null);
+			Class<Auditor> auditClass = (Class<Auditor>) Class.forName(serviceConfig.getAuditingConfig().getClassName());
+			Auditor audit = (Auditor)auditClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuditingConfig());
 			this.setAuditor(audit);
 
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			System.err.println("COULD NOT FIND THE CLASS: " + e.getLocalizedMessage());
+			throw e;
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {

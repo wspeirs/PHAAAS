@@ -3,23 +3,15 @@
 <server port="8080">
     <service url="*">
         <!-- need to list the allowed headers here, otherwise we just let everything through -->
-        <authentication className="com.bittrust.authorization.ActiveDirectory">
-          <param name="bind-name">test</param>
-          <param name="bind-pass">test</param>
+        
+        <authentication className="com.bittrust.authentication.NullAuthenticator">
+            <param name="result">true</param>
         </authentication>
-        <authorization className="com.bittrust.authorization.NullAuthorizer">
-        </authorization>
-        <auditing className="com.bittrust.auditing.Verbose">
-        </auditing>
-    </service>
 
-    <service url="/phaaas">
-        <authentication className="com.bittrust.authorization.ActiveDirectory">
-          <param name="bind-name">test</param>
-          <param name="bind-pass">test</param>
-        </authentication>
         <authorization className="com.bittrust.authorization.NullAuthorizer">
+            <param name="result">true</param>
         </authorization>
+
         <auditing className="com.bittrust.auditing.Verbose">
         </auditing>
     </service>
