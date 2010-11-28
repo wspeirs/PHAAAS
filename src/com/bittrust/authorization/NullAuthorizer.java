@@ -9,6 +9,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
 
 import com.bittrust.config.BasicModuleConfig;
 
@@ -34,7 +35,7 @@ public class NullAuthorizer implements Authorizer {
 	}
 	
 	@Override
-	public boolean authorize(HttpRequest request) {
+	public boolean authorize(HttpRequest request, JSONObject sessionMetaData) {
 		return result;
 	}
 

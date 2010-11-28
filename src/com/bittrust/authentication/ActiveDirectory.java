@@ -15,6 +15,7 @@ import javax.naming.ldap.LdapContext;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
 
 /**
  * @class ActiveDirectory
@@ -31,7 +32,7 @@ public class ActiveDirectory implements Authenticator {
 	}
 
 	@Override
-	public boolean authenticate(HttpRequest request) {
+	public boolean authenticate(HttpRequest request, JSONObject sessionMetaData) {
 		
 		
 		return false;

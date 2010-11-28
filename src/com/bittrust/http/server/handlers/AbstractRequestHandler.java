@@ -6,6 +6,7 @@ package com.bittrust.http.server.handlers;
 import java.io.IOException;
 import java.net.HttpCookie;
 import java.net.InetAddress;
+import java.text.ParseException;
 import java.util.Set;
 
 import org.apache.http.Header;
@@ -15,6 +16,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.json.JSONObject;
 
 import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
@@ -104,17 +106,19 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 		
 		boolean needsAuth = true;
 		String sessionID = HTTPUtils.getCookie(request, SESSION_COOKIE);
-		String sessionMetaData = null;
+		JSONObject sessionMetaData = null;
 		String user = null;
 		
 		// only if the session is valid do we NOT need to auth
 		if(sessionID != null) {
 			if(sessionStore.validateSession(sessionID) == true) {
 				needsAuth = false;	// we have a valid session ID, so no auth needed
-				sessionMetaData = sessionStore.retrieveMetaData(sessionID);
+				try { sessionMetaData = new JSONObject(sessionStore.retrieveMetaData(sessionID)); }
+				catch (ParseException e) { e.printStackTrace();	}
 				// get the user from the session data
 			} else { // we got a session ID, but it is bogus
 				sessionID = null;
+				sessionMetaData = new JSONObject();
 				user = authenticator.getUser(request);
 			}
 		}
@@ -123,19 +127,20 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 		auditor.receivedRequest(request, user);
 		
 		// attempt to authenticate the user
-		if(needsAuth && !authenticator.authenticate(request)) {
+		if(needsAuth && !authenticator.authenticate(request, sessionMetaData)) {
 			auditor.authenticationFailed(log, user);
 			auditor.writeLog(log);
 			authenticator.authenticationFailed(request, response, context);
 			return;
 		} else { // we have a user that has authenticated
 			sessionID = sessionStore.createSession();	// create a session
-			// store the user name in the meta data
+			sessionMetaData.put("user", user);
+			sessionStore.storeMetaData(sessionID, sessionMetaData.toString());
 		}
 
 		
 		// see if the user is authorized
-		if(!authorizer.authorize(request)) {
+		if(!authorizer.authorize(request, sessionMetaData)) {
 			auditor.authorizationFailed(log, user);
 			auditor.writeLog(log);
 			authorizer.authorizationFailed(request, response, context);

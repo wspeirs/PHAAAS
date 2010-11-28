@@ -6,6 +6,7 @@ package com.bittrust.authentication;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
 
 /**
  * @interface Authenticator
@@ -17,7 +18,7 @@ public interface Authenticator {
 	 * @param request The HTTP request.
 	 * @return True if the user is authenticated, false otherwise.
 	 */
-	public boolean authenticate(HttpRequest request);
+	public boolean authenticate(HttpRequest request, JSONObject sessionMetaData);
 	
 	/**
 	 * Given a request, return the user trying to authenticate.

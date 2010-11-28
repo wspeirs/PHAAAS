@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <server port="8080">
-    <service url="*">
+    <service host="educated-solutions.com" url="*">
         <!-- need to list the allowed headers here, otherwise we just let everything through -->
         
         <authentication className="com.bittrust.authentication.NullAuthenticator">
