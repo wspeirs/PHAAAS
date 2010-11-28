@@ -5,11 +5,8 @@ package com.bittrust.http.server.handlers;
 
 import java.io.IOException;
 import java.net.HttpCookie;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.net.InetAddress;
 import java.util.Set;
-import java.util.SimpleTimeZone;
-import java.util.StringTokenizer;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
@@ -22,6 +19,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
+import com.bittrust.http.HTTPUtils;
 import com.bittrust.http.client.BasicHttpRequestor;
 import com.bittrust.http.client.HttpRequestor;
 import com.bittrust.session.SessionStore;
@@ -101,30 +99,45 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	 */
 	public final void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 		
-		// check to see if they have a valid session ID
+		// log the connection
+		StringBuilder log = auditor.receivedConnection((InetAddress)context.getAttribute("REMOTE_ADDRESS"));
+		
 		boolean needsAuth = true;
-		String sessionID = getCookie(request, SESSION_COOKIE);
+		String sessionID = HTTPUtils.getCookie(request, SESSION_COOKIE);
+		String sessionMetaData = null;
+		String user = null;
 		
 		// only if the session is valid do we NOT need to auth
 		if(sessionID != null) {
 			if(sessionStore.validateSession(sessionID) == true) {
 				needsAuth = false;	// we have a valid session ID, so no auth needed
+				sessionMetaData = sessionStore.retrieveMetaData(sessionID);
+				// get the user from the session data
 			} else { // we got a session ID, but it is bogus
 				sessionID = null;
+				user = authenticator.getUser(request);
 			}
 		}
-		
-		System.out.println(request.getRequestLine() + " ID: " + sessionID + " AUTH: " + needsAuth);
 
+		// log the request
+		auditor.receivedRequest(request, user);
+		
 		// attempt to authenticate the user
 		if(needsAuth && !authenticator.authenticate(request)) {
+			auditor.authenticationFailed(log, user);
+			auditor.writeLog(log);
 			authenticator.authenticationFailed(request, response, context);
 			return;
+		} else { // we have a user that has authenticated
+			sessionID = sessionStore.createSession();	// create a session
+			// store the user name in the meta data
 		}
 
 		
 		// see if the user is authorized
 		if(!authorizer.authorize(request)) {
+			auditor.authorizationFailed(log, user);
+			auditor.writeLog(log);
 			authorizer.authorizationFailed(request, response, context);
 			return;
 		}
@@ -137,8 +150,12 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 		HttpResponse serverResponse = httpRequestor.request(request, context);
 		
 		// copy over the client's response (stupid pass by value...)
-		if(serverResponse != null)
-			createResponse(response, serverResponse, request, sessionID);
+		if(serverResponse != null) {
+			if(!needsAuth)	// we didn't need auth, so we already had a session cookie
+				createResponse(response, serverResponse);
+			else	// we needed to auth, so we must have created a new session cookie
+				createResponse(response, serverResponse, HTTPUtils.getHeader(request, "Host"), sessionID);
+		}
 	}
 	
 	/**
@@ -162,93 +179,48 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	}
 	
 	/**
-	 * Creates a response based on the client's response and the session ID
+	 * Creates a response based on the server's response.
 	 * @param responseToClient The response to send to the client
 	 * @param responseFromServer The response from the server
-	 * @param sessionID The session ID, if null then a new one will be created
 	 */
-	private void createResponse(HttpResponse responseToClient, HttpResponse responseFromServer, HttpRequest request, String sessionID) {
+	private void createResponse(HttpResponse responseToClient, HttpResponse responseFromServer) {
 		// copy over the status line
 		responseToClient.setStatusLine(responseFromServer.getStatusLine());
 		
 		// copy over the headers
 		responseToClient.setHeaders(responseFromServer.getAllHeaders());
 		
-		// check to see if we need to create a new session
-		if(sessionID == null) {
-			HttpCookie phaaasCookie = new HttpCookie(SESSION_COOKIE, sessionStore.createSession());
-			String host = getHeader(request, "Host");
+		// copy over the entity
+		responseToClient.setEntity(responseFromServer.getEntity());
+	}
 
+	/**
+	 * Creates a response based on the server's response and injects the session cookie.
+	 * @param responseToClient The response to send to the client
+	 * @param responseFromServer The response from the server
+	 * @param host The host to set for the cookie.
+	 * @param sessionID The session ID for this session
+	 */
+	private void createResponse(HttpResponse responseToClient, HttpResponse responseFromServer, String host, String sessionID) {
+		createResponse(responseToClient, responseFromServer);	// create the response
+
+		// create a cookie for the session ID
+		HttpCookie phaaasCookie = new HttpCookie(SESSION_COOKIE, sessionID);
+
+		if(host != null) {
 			// parse out the last 2 parts of the host for the domain
 			int index = host.lastIndexOf('.');
 			index = host.lastIndexOf('.', index-1);
 			
-			// setup the cookie
-			phaaasCookie.setMaxAge(900);	// 15 minutes
-			phaaasCookie.setPath("/");
 			phaaasCookie.setDomain(host.substring(index, host.length()));
-			phaaasCookie.setVersion(1);		// set to the RFC 2965/2109 version
-			
-			responseToClient.addHeader("Set-Cookie", phaaasCookie.toString());
 		}
-		
-		// copy over the entity
-		responseToClient.setEntity(responseFromServer.getEntity());
-	}
-	
-	/**
-	 * Go through the headers getting the requested header or null if not found.
-	 * @param request The request to search.
-	 * @param headerName The name of the header to find.
-	 * @return The value of the header, or null if not found.
-	 */
-	private String getHeader(HttpRequest request, String headerName) {
-		HeaderIterator iterator = request.headerIterator();
-		String ret = null;
 
-		while(iterator.hasNext()) {
-			Header h = iterator.nextHeader();
-			
-			if(h.getName().equalsIgnoreCase(headerName)) {
-				
-				ret = h.getValue();
-				
-				break;
-			}
-		}
+		// setup the cookie
+		phaaasCookie.setMaxAge(900);	// 15 minutes
+		phaaasCookie.setPath("/");
+		phaaasCookie.setVersion(1);		// set to the RFC 2965/2109 version
 		
-		return ret;
+		responseToClient.addHeader("Set-Cookie", phaaasCookie.toString());
 	}
-	
-	/**
-	 * Returns the value of a cookie, given its name.
-	 * @param cookieName The name of the cookie to find
-	 * @return The value of the cookie or null if the cookie is not found.
-	 */
-	private String getCookie(HttpRequest request, String cookieName) {
-		String ret = null;
-		String cookieHeader = getHeader(request, "Cookie");
-		
-		// if we cannot find the header, then cannot find the cookie
-		if(cookieHeader == null)
-			return ret;
 
-		StringTokenizer tokenizer = new StringTokenizer(cookieHeader, "; ");
-
-		// go through all the tokens splitting by ;
-		while(tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			
-			// make sure the token starts with cookieName=
-			if(token.startsWith(cookieName + "=")) {
-				tokenizer = new StringTokenizer(token, "=");
-				
-				tokenizer.nextToken();	// this cookieName
-				ret = tokenizer.nextToken().replaceAll("\"", "");	// this is the value
-				break;
-			}
-		}
-		
-		return ret;
-	}
 }

@@ -9,6 +9,8 @@ package com.bittrust.config;
 public class ServiceConfig {
 
 	private String url = "*";
+	private String host = "*";
+	
 	private BasicModuleConfig authenticationConfig = null;
 	private BasicModuleConfig authorizationConfig = null;
 	private BasicModuleConfig auditingConfig = null;
@@ -20,6 +22,14 @@ public class ServiceConfig {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
 	}
 
 	public BasicModuleConfig getAuthenticationConfig() {

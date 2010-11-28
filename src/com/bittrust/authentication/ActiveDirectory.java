@@ -77,4 +77,9 @@ public class ActiveDirectory implements Authenticator {
 	public void authenticationFailed(HttpRequest request, HttpResponse response, HttpContext context) {
 	}
 
+	@Override
+	public String getUser(HttpRequest request) {
+		return null;
+	}
+
 }

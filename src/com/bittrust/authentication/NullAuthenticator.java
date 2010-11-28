@@ -51,4 +51,9 @@ public class NullAuthenticator implements Authenticator {
 		}
 	}
 
+	@Override
+	public String getUser(HttpRequest request) {
+		return result + "";
+	}
+
 }
