@@ -10,6 +10,7 @@ import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
 import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.config.ServiceConfig;
+import com.bittrust.session.SessionStore;
 
 /**
  * @class ConfiguredHandler
@@ -38,6 +39,11 @@ public class ConfiguredHandler extends AbstractRequestHandler {
 			Class<Auditor> auditClass = (Class<Auditor>) Class.forName(serviceConfig.getAuditingConfig().getClassName());
 			Auditor audit = (Auditor)auditClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuditingConfig());
 			this.setAuditor(audit);
+
+			// setup the session
+			Class<SessionStore> sessionClass = (Class<SessionStore>) Class.forName(serviceConfig.getSessionConfig().getClassName());
+			SessionStore sessionStore = (SessionStore)sessionClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getSessionConfig());
+			this.setSessionStore(sessionStore);
 
 		} catch (ClassNotFoundException e) {
 			System.err.println("COULD NOT FIND THE CLASS: " + e.getLocalizedMessage());

@@ -12,6 +12,7 @@ public class ServiceConfig {
 	private BasicModuleConfig authenticationConfig = null;
 	private BasicModuleConfig authorizationConfig = null;
 	private BasicModuleConfig auditingConfig = null;
+	private BasicModuleConfig sessionConfig = null;
 
 	public String getUrl() {
 		return url;
@@ -43,5 +44,13 @@ public class ServiceConfig {
 
 	public void setAuditingConfig(BasicModuleConfig auditingConfig) {
 		this.auditingConfig = auditingConfig;
+	}
+
+	public BasicModuleConfig getSessionConfig() {
+		return sessionConfig;
+	}
+
+	public void setSessionConfig(BasicModuleConfig sessionConfig) {
+		this.sessionConfig = sessionConfig;
 	}
 }

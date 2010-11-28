@@ -14,6 +14,9 @@
 
         <auditing className="com.bittrust.auditing.Verbose">
         </auditing>
+        
+        <session className="com.bittrust.session.MemoryStore">
+        </session>
     </service>
 
 </server>

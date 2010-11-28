@@ -9,8 +9,9 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
+
+import com.bittrust.http.server.handlers.AbstractRequestHandler;
 
 /**
  * @class HttpServer
@@ -35,7 +36,7 @@ public class HttpServer implements Runnable {
 		this.pool = Executors.newFixedThreadPool(threadPoolSize);	// setup the thread pool for the connections
 	}
 	
-	public void setHandler(String url, HttpRequestHandler handler) {
+	public void setHandler(String url, AbstractRequestHandler handler) {
 		resolver.register(url, handler);
 	}
 	

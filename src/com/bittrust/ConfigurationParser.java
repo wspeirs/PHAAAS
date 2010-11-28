@@ -34,28 +34,25 @@ public class ConfigurationParser {
 		digester.addSetNext("server/service", "addServiceConfig", "com.bittrust.config.ServiceConfig");
 		
 		// setup authentication
-		digester.addObjectCreate("server/service/authentication", "com.bittrust.config.BasicModuleConfig");
-		digester.addSetProperties("server/service/authentication");
-		digester.addSetNext("server/service/authentication", "setAuthenticationConfig");
-		digester.addCallMethod("server/service/authentication/param", "addParam", 2);
-		digester.addCallParam("server/service/authentication/param", 0, "name");
-		digester.addCallParam("server/service/authentication/param", 1);
+		addBasicModuleConfig("authentication", "setAuthenticationConfig");
 		
 		// setup authorization
-		digester.addObjectCreate("server/service/authorization", "com.bittrust.config.BasicModuleConfig");
-		digester.addSetProperties("server/service/authorization");
-		digester.addSetNext("server/service/authorization", "setAuthorizationConfig");
-		digester.addCallMethod("server/service/authorization/param", "addParam", 2);
-		digester.addCallParam("server/service/authorization/param", 0, "name");
-		digester.addCallParam("server/service/authorization/param", 1);
+		addBasicModuleConfig("authorization", "setAuthorizationConfig");
 
 		// setup auditing
-		digester.addObjectCreate("server/service/auditing", "com.bittrust.config.BasicModuleConfig");
-		digester.addSetProperties("server/service/auditing");
-		digester.addSetNext("server/service/auditing", "setAuditingConfig");
-		digester.addCallMethod("server/service/auditing/param", "addParam", 2);
-		digester.addCallParam("server/service/auditing/param", 0, "name");
-		digester.addCallParam("server/service/auditing/param", 1);
+		addBasicModuleConfig("auditing", "setAuditingConfig");
+		
+		// setup sessioning
+		addBasicModuleConfig("session", "setSessionConfig");
+	}
+	
+	private void addBasicModuleConfig(String moduleName, String methodName) {
+		digester.addObjectCreate("server/service/" + moduleName, "com.bittrust.config.BasicModuleConfig");
+		digester.addSetProperties("server/service/" + moduleName);
+		digester.addSetNext("server/service/" + moduleName, methodName);
+		digester.addCallMethod("server/service/" + moduleName + "/param", "addParam", 2);
+		digester.addCallParam("server/service/" + moduleName + "/param", 0, "name");
+		digester.addCallParam("server/service/" + moduleName + "/param", 1);
 	}
 	
 	public ServerConfig parse(File configFile) {
