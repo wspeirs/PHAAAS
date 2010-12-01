@@ -21,7 +21,12 @@ import org.json.JSONObject;
 import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
-import com.bittrust.http.HTTPUtils;
+import com.bittrust.credential.providers.CredentialProvider;
+import com.bittrust.credential.providers.CredentialProvider.CredentialProviderResult;
+import com.bittrust.http.HttpUtils;
+import com.bittrust.http.PhaaasContext;
+import com.bittrust.http.RequestModifier;
+import com.bittrust.http.ResponseModifier;
 import com.bittrust.http.client.BasicHttpRequestor;
 import com.bittrust.http.client.HttpRequestor;
 import com.bittrust.session.SessionStore;
@@ -34,8 +39,13 @@ import com.bittrust.session.SessionStore;
 public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	
 	private Set<String> allowedHeaders;
+	private CredentialProvider credentialProvider;
 	private Authenticator authenticator;
 	private Authorizer authorizer;
+	private RequestModifier requestModifier;
+	private ResponseModifier responseModifier;
+	
+	
 	private Auditor auditor;
 	private SessionStore sessionStore;
 	private HttpRequestor httpRequestor;
@@ -99,68 +109,60 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 	 * @param response The HTTP response
 	 * @param context The HTTP execution context
 	 */
-	public final void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
+	public final void handle(HttpRequest request, HttpResponse response, HttpContext httpContext) throws HttpException, IOException {
 		
 		// log the connection
-		StringBuilder log = auditor.receivedConnection((InetAddress)context.getAttribute("REMOTE_ADDRESS"));
+		StringBuilder log = auditor.receivedConnection((InetAddress)httpContext.getAttribute("REMOTE_ADDRESS"));
 		
-		boolean needsAuth = true;
-		String sessionID = HTTPUtils.getCookie(request, SESSION_COOKIE);
-		JSONObject sessionMetaData = null;
-		String user = null;
+		// create the PhaaasContext
+		PhaaasContext context = new PhaaasContext(httpContext, request);
 		
-		// only if the session is valid do we NOT need to auth
-		if(sessionID != null) {
-			if(sessionStore.validateSession(sessionID) == true) {
-				needsAuth = false;	// we have a valid session ID, so no auth needed
-				try { sessionMetaData = new JSONObject(sessionStore.retrieveMetaData(sessionID)); }
-				catch (ParseException e) { e.printStackTrace();	}
-				// get the user from the session data
-			} else { // we got a session ID, but it is bogus
-				sessionID = null;
-				sessionMetaData = new JSONObject();
-				user = authenticator.getUser(request);
+		// get the credentials from the request
+		CredentialProviderResult credRes = credentialProvider.getCredentialOrPrincipal(sessionStore, context);
+		
+		boolean isAuthorized = false;
+		
+		// based upon the result we do different things
+		switch(credRes) {
+		case CREDENTIAL_FOUND:	// creds found, continue with auth
+			context.setPrincipal(authenticator.authenticate(context));
+		case PRINCIPAL_FOUND:	// we have a principal from a previous authentication or from the authenticator
+			isAuthorized = authorizer.authorize(context);
+			break;
+		case SEND_RESPONSE:		// we need to send a response back to the client
+			HttpUtils.copyResponse(response, context.getHttpResponse());
+			return;
+		}
+
+		// not authorized so copy the response and send it to the client
+		if(!isAuthorized) {
+			String sessionId = context.getSessionId();
+			HttpResponse unauthResponse = context.getHttpResponse();
+			
+			// see if we've saved this principal yet, if not then save it
+			// at this point auth passed, so we want to save this session
+			if(sessionId == null) {
+				String host = context.getHttpRequest().getFirstHeader("Host").toString();
+				sessionId = sessionStore.createSession(context.getPrincipal());
+				HttpUtils.setCookie(unauthResponse, host, SESSION_COOKIE, sessionId);
 			}
-		}
-
-		// log the request
-		auditor.receivedRequest(request, user);
-		
-		// attempt to authenticate the user
-		if(needsAuth && !authenticator.authenticate(request, sessionMetaData)) {
-			auditor.authenticationFailed(log, user);
-			auditor.writeLog(log);
-			authenticator.authenticationFailed(request, response, context);
-			return;
-		} else { // we have a user that has authenticated
-			sessionID = sessionStore.createSession();	// create a session
-			sessionMetaData.put("user", user);
-			sessionStore.storeMetaData(sessionID, sessionMetaData.toString());
-		}
-
-		
-		// see if the user is authorized
-		if(!authorizer.authorize(request, sessionMetaData)) {
-			auditor.authorizationFailed(log, user);
-			auditor.writeLog(log);
-			authorizer.authorizationFailed(request, response, context);
-			return;
+			
+			// copy the response over
+			HttpUtils.copyResponse(response, unauthResponse);
+			return;	// this will return the response to the client
 		}
 		
-		// white list the request
-		if(allowedHeaders != null)
-			request = whitelistRequest(request);
+		// modify the request to send to the server
+		HttpRequest modifiedRequest = requestModifier.modifyRequest(context);
 		
-		// make the request to the resource
-		HttpResponse serverResponse = httpRequestor.request(request, context);
+		// send the request to the server
+		context.setHttpResponse(HttpUtils.makeRequest(modifiedRequest, context));
 		
-		// copy over the client's response (stupid pass by value...)
-		if(serverResponse != null) {
-			if(!needsAuth)	// we didn't need auth, so we already had a session cookie
-				createResponse(response, serverResponse);
-			else	// we needed to auth, so we must have created a new session cookie
-				createResponse(response, serverResponse, HTTPUtils.getHeader(request, "Host"), sessionID);
-		}
+		// modify the response
+		 HttpResponse responseForClient = responseModifier.modifyResponse(context);
+		 
+		 // copy over the response
+		 HttpUtils.copyResponse(responseForClient, context.getHttpResponse());
 	}
 	
 	/**
@@ -183,49 +185,4 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 		return request;	// return the request afters stripping headers
 	}
 	
-	/**
-	 * Creates a response based on the server's response.
-	 * @param responseToClient The response to send to the client
-	 * @param responseFromServer The response from the server
-	 */
-	private void createResponse(HttpResponse responseToClient, HttpResponse responseFromServer) {
-		// copy over the status line
-		responseToClient.setStatusLine(responseFromServer.getStatusLine());
-		
-		// copy over the headers
-		responseToClient.setHeaders(responseFromServer.getAllHeaders());
-		
-		// copy over the entity
-		responseToClient.setEntity(responseFromServer.getEntity());
-	}
-
-	/**
-	 * Creates a response based on the server's response and injects the session cookie.
-	 * @param responseToClient The response to send to the client
-	 * @param responseFromServer The response from the server
-	 * @param host The host to set for the cookie.
-	 * @param sessionID The session ID for this session
-	 */
-	private void createResponse(HttpResponse responseToClient, HttpResponse responseFromServer, String host, String sessionID) {
-		createResponse(responseToClient, responseFromServer);	// create the response
-
-		// create a cookie for the session ID
-		HttpCookie phaaasCookie = new HttpCookie(SESSION_COOKIE, sessionID);
-
-		if(host != null) {
-			// parse out the last 2 parts of the host for the domain
-			int index = host.lastIndexOf('.');
-			index = host.lastIndexOf('.', index-1);
-			
-			phaaasCookie.setDomain(host.substring(index, host.length()));
-		}
-
-		// setup the cookie
-		phaaasCookie.setMaxAge(900);	// 15 minutes
-		phaaasCookie.setPath("/");
-		phaaasCookie.setVersion(1);		// set to the RFC 2965/2109 version
-		
-		responseToClient.addHeader("Set-Cookie", phaaasCookie.toString());
-	}
-
 }

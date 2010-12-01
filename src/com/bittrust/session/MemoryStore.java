@@ -8,34 +8,35 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.credential.Principal;
 
 /**
  * @class MemoryStore
  */
 public class MemoryStore implements SessionStore {
 	
-	private Map<String, String> sessions = new HashMap<String, String>();
+	private Map<String, Principal> sessions = new HashMap<String, Principal>();
 	
 	public MemoryStore(BasicModuleConfig config) {
 		;	// we don't do anything with this config
 	}
 	
 	@Override
-	public synchronized String createSession() {
+	public synchronized String createSession(Principal principal) {
 		String id = UUID.randomUUID().toString();	// generate a random UUID as the ID
 		
-		sessions.put(id, "");	// add the session to the store
+		sessions.put(id, principal);	// add the session to the store
 		
 		return id;	// return the ID
 	}
 
 	@Override
-	public synchronized void storeMetaData(String sessionID, String metaData) {
-		sessions.put(sessionID, metaData);
+	public synchronized void storePrincipal(String sessionID, Principal principal) {
+		sessions.put(sessionID, principal);
 	}
 
 	@Override
-	public String retrieveMetaData(String sessionID) {
+	public Principal retrievePrincipal(String sessionID) {
 		return sessions.get(sessionID);
 	}
 

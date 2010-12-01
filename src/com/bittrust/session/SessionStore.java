@@ -3,6 +3,8 @@
  */
 package com.bittrust.session;
 
+import com.bittrust.credential.Principal;
+
 /**
  * @interface SessionStore
  * 
@@ -11,35 +13,36 @@ package com.bittrust.session;
 public interface SessionStore {
 
 	/**
-	 * Creates a new session and returns the session ID.
+	 * Creates a new session storing the associated principal and returning the session ID.
+	 * @param principal The principal which is stored in the session.
 	 * @return The newly created session ID.
 	 */
-	public String createSession();
+	public String createSession(Principal principal);
 	
 	/**
 	 * Given a session ID validates that it valid and active.
 	 * @param sessionID The session ID to validate.
 	 * @return True if the session is valid and active, false otherwise.
 	 */
-	public boolean validateSession(String sessionID);
+	public boolean validateSession(String sessionId);
 	
 	/**
-	 * Stores meta data about a session.
-	 * @param sessionID The session ID to store the associated meta data.
-	 * @param metaData The meta data to store with the session.
+	 * Stores a principal in a session.
+	 * @param sessionID The session ID to store the Principal.
+	 * @param principal The Principal to store in the session.
 	 */
-	public void storeMetaData(String sessionID, String metaData);
+	public void storePrincipal(String sessionId, Principal principal);
 	
 	/**
-	 * Retrieves previously stored meta data.
-	 * @param sessionID The session ID to retrieve meta data for.
-	 * @return The associated meta data.
+	 * Retrieves previously stored Principal.
+	 * @param sessionID The session ID of the Principal to retrieve.
+	 * @return The stored Principal or null if one is not found.
 	 */
-	public String retrieveMetaData(String sessionID);
+	public Principal retrievePrincipal(String sessionId);
 	
 	/**
-	 * Deletes a session and all associated meta data.
+	 * Deletes a session for a Principal
 	 * @param sessionID The session to delete.
 	 */
-	public void deleteSession(String sessionID);
+	public void deleteSession(String sessionId);
 }

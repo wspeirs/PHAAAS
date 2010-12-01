@@ -5,13 +5,13 @@ package com.bittrust.authorization;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
 
 import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.http.HttpUtils;
+import com.bittrust.http.HttpUtils.StatusCode;
+import com.bittrust.http.PhaaasContext;
 
 /**
  * @class NullAuthorizer
@@ -35,22 +35,22 @@ public class NullAuthorizer implements Authorizer {
 	}
 	
 	@Override
-	public boolean authorize(HttpRequest request, JSONObject sessionMetaData) {
-		return result;
-	}
-
-	@Override
-	public void authorizationFailed(HttpRequest request, HttpResponse response,	HttpContext context) {
-		try {
+	public boolean authorize(PhaaasContext context) {
+		if(result == false) {
+			try {
+			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHORIZED);
 			StringEntity entity = new StringEntity("Authorization Failed");
 			
 			response.setHeader("Content-Length", entity.getContentLength()+"");
 			response.setEntity(entity);
 			
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			// set the response in the context
+			context.setHttpResponse(response);
+			} catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		}
-
+		
+		return result;
 	}
-
 }

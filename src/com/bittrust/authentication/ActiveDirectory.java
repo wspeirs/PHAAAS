@@ -12,10 +12,10 @@ import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
+import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.credential.Credential;
+import com.bittrust.credential.Principal;
+import com.bittrust.http.PhaaasContext;
 
 /**
  * @class ActiveDirectory
@@ -25,29 +25,34 @@ public class ActiveDirectory implements Authenticator {
 	private Hashtable<Object, String> ldapEnv = new Hashtable<Object, String>();
 	private LdapContext ldapCtx;
 	
-	public static void main(String[] args) {
-		ActiveDirectory ad = new ActiveDirectory();
-		
-		ad.authenticateUser("test", "test");
+	private String host = null;
+	private String baseDN = null;
+	
+	public ActiveDirectory(String host, String baseDN) {
+		this.host = host;
+		this.baseDN = baseDN;
+	}
+	
+	public ActiveDirectory(BasicModuleConfig config) {
+		this.host = config.getParam("host");
+		this.baseDN = config.getParam("baseDN");
 	}
 
 	@Override
-	public boolean authenticate(HttpRequest request, JSONObject sessionMetaData) {
+	public Principal authenticate(PhaaasContext context) {
+		Credential credential = context.getCredential();
+		String username = credential.getUserName();
+		Principal principal = null;
 		
-		
-		return false;
-	}
-	
-	public boolean authenticateUser(String username, String password) {
 		ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
 		 
 		// set security credentials, note using simple clear-text authentication
 		ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-		ldapEnv.put(Context.SECURITY_PRINCIPAL, "test");	// username
-		ldapEnv.put(Context.SECURITY_CREDENTIALS, "test");	// password
+		ldapEnv.put(Context.SECURITY_PRINCIPAL, username);	// username
+		ldapEnv.put(Context.SECURITY_CREDENTIALS, credential.getProperty("password"));	// password
 		
 		// the ldap server
-		ldapEnv.put(Context.PROVIDER_URL, "ldap://192.168.1.33");
+		ldapEnv.put(Context.PROVIDER_URL, "ldap://" + host);
 		
 		// we need to chase referrals when retrieving attributes
 		ldapEnv.put(Context.REFERRAL, "follow");
@@ -56,31 +61,24 @@ public class ActiveDirectory implements Authenticator {
 			// make the connection to the server
 			ldapCtx = new InitialLdapContext(ldapEnv, null);
 			
-			Attributes attrs = ldapCtx.getAttributes("cn=test,cn=Users,dc=ad,dc=es,dc=com", new String[] { "memberOf" });
+			Attributes attrs = ldapCtx.getAttributes("cn=" + username + ",cn=Users," + baseDN, new String[] { "memberOf" });
 			
 			System.out.println("ATTRS: " + attrs);
 			
 			Attribute attr = attrs.get("memberOf");
 			
+			// create our new principal
+			principal = new Principal(username);
+			
 			for(int i=0; i < attr.size(); ++i) {
 				System.out.println("GROUP: " + attr.get(i));
+				principal.addGroup(attr.get(i).toString());	// add the group to the principal
 			}
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
-			return false;
 		}
 		
-		return true;
+		return principal;
 	}
-
-	@Override
-	public void authenticationFailed(HttpRequest request, HttpResponse response, HttpContext context) {
-	}
-
-	@Override
-	public String getUser(HttpRequest request) {
-		return null;
-	}
-
 }

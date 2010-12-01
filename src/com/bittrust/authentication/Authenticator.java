@@ -4,9 +4,10 @@
 package com.bittrust.authentication;
 
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
+
+import com.bittrust.credential.Credential;
+import com.bittrust.credential.Principal;
+import com.bittrust.http.PhaaasContext;
 
 /**
  * @interface Authenticator
@@ -14,25 +15,13 @@ import org.json.JSONObject;
 public interface Authenticator {
 
 	/**
-	 * Attempt to authenticate a user.
-	 * @param request The HTTP request.
-	 * @return True if the user is authenticated, false otherwise.
+	 * Attempts to authenticate a user generating a principal upon successful authentication.
+	 * 
+	 * If the user is unsuccessfully authenticated then a proper response should be placed in
+	 * the context and the method should return null.
+	 * @param context The context of the authentication with contains the credential to authenticate.
+	 * @return The principal upon successful authentication, null upon unsuccessful authentication.
 	 */
-	public boolean authenticate(HttpRequest request, JSONObject sessionMetaData);
+	public Principal authenticate(PhaaasContext context);
 	
-	/**
-	 * Given a request, return the user trying to authenticate.
-	 * @param request The HTTP request. 
-	 * @return The user attempting to authenticate.
-	 */
-	public String getUser(HttpRequest request);
-	
-	/**
-	 * Generate the proper response given a failed authentication.
-	 * @param request The HTTP request.
-	 * @param response The response to send back to the client.
-	 * @param context The context.
-	 */
-	public void authenticationFailed(HttpRequest request, HttpResponse response, HttpContext context);
-
 }

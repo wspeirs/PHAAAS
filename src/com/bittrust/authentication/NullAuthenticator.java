@@ -9,9 +9,12 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
 
 import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.credential.Principal;
+import com.bittrust.http.HttpUtils;
+import com.bittrust.http.HttpUtils.StatusCode;
+import com.bittrust.http.PhaaasContext;
 
 /**
  * @class NullAuthenticator
@@ -35,26 +38,26 @@ public class NullAuthenticator implements Authenticator {
 	}
 
 	@Override
-	public boolean authenticate(HttpRequest request, JSONObject sessionMetaData) {
-		return result;
-	}
-
-	@Override
-	public void authenticationFailed(HttpRequest request, HttpResponse response, HttpContext context) {
-		try {
+	public Principal authenticate(PhaaasContext context) {
+		Principal ret = null;
+		
+		if(result) {
+			ret = new Principal("test");
+		} else {
+			try {
+			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHENTICATED);
 			StringEntity entity = new StringEntity("Authentication Failed");
 			
 			response.setHeader("Content-Length", entity.getContentLength()+"");
 			response.setEntity(entity);
 			
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			// set the response in the context
+			context.setHttpResponse(response);
+			} catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		}
+		
+		return ret;
 	}
-
-	@Override
-	public String getUser(HttpRequest request) {
-		return result + "";
-	}
-
 }
