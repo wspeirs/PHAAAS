@@ -3,7 +3,6 @@
  */
 package com.bittrust.credential;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**

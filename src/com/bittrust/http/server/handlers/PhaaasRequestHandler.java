@@ -4,9 +4,8 @@
 package com.bittrust.http.server.handlers;
 
 import java.io.IOException;
-import java.net.HttpCookie;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
-import java.text.ParseException;
 import java.util.Set;
 
 import org.apache.http.Header;
@@ -16,11 +15,12 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.json.JSONObject;
 
 import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
+import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.config.ServiceConfig;
 import com.bittrust.credential.providers.CredentialProvider;
 import com.bittrust.credential.providers.CredentialProvider.CredentialProviderResult;
 import com.bittrust.http.HttpUtils;
@@ -32,76 +32,71 @@ import com.bittrust.http.client.HttpRequestor;
 import com.bittrust.session.SessionStore;
 
 /**
- * @class AbstractRequestHandler
+ * @class PhaaasRequestHandler
  * 
  * An abstract handler which provides the basic framework for all other handlers
  */
-public abstract class AbstractRequestHandler implements HttpRequestHandler {
+public class PhaaasRequestHandler implements HttpRequestHandler {
 	
-	private Set<String> allowedHeaders;
+	private ServiceConfig serviceConfig = null;
+
+	// modules
 	private CredentialProvider credentialProvider;
 	private Authenticator authenticator;
 	private Authorizer authorizer;
 	private RequestModifier requestModifier;
 	private ResponseModifier responseModifier;
 	
-	
 	private Auditor auditor;
 	private SessionStore sessionStore;
-	private HttpRequestor httpRequestor;
+	private HttpRequestor httpRequestor;	//TODO: Re-work this
 	
 	private final static String SESSION_COOKIE = "PHAAASID";
 	
-	public AbstractRequestHandler() {
-		this.allowedHeaders = null;
-		this.authenticator = null;
-		this.authorizer = null;
+	public PhaaasRequestHandler(ServiceConfig serviceConfig) throws Exception {
+		this.serviceConfig = serviceConfig;
 		this.httpRequestor = new BasicHttpRequestor();
+		
+		try {
+			// setup the credential provider
+			Class<CredentialProvider> credClass = (Class<CredentialProvider>) Class.forName(serviceConfig.getCredentialConfig().getClassName());
+			this.credentialProvider = (CredentialProvider)credClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getCredentialConfig());
+
+			// setup the authenticator
+			Class<Authenticator> authClass = (Class<Authenticator>) Class.forName(serviceConfig.getAuthenticationConfig().getClassName());
+			this.authenticator = (Authenticator)authClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthenticationConfig());
+
+			// setup the authorizer
+			Class<Authorizer> authzClass = (Class<Authorizer>) Class.forName(serviceConfig.getAuthorizationConfig().getClassName());
+			this.authorizer = (Authorizer)authzClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthorizationConfig());
+
+			// setup the request modifier
+			Class<RequestModifier> requestClass = (Class<RequestModifier>) Class.forName(serviceConfig.getRequestConfig().getClassName());
+			this.requestModifier = (RequestModifier)requestClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getRequestConfig());
+
+			// setup the response modifier
+			Class<ResponseModifier> responseClass = (Class<ResponseModifier>) Class.forName(serviceConfig.getResponseConfig().getClassName());
+			this.responseModifier = (ResponseModifier)responseClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getResponseConfig());
+
+		} catch (ClassNotFoundException e) {
+			System.err.println("COULD NOT FIND THE CLASS: " + e.getLocalizedMessage());
+			throw e;
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+
 	}
 	
-	public AbstractRequestHandler(Set<String> allowedHeaders, Authenticator authenticator, Authorizer authorizer, Auditor auditor) {
-		this.allowedHeaders = allowedHeaders;
-		this.authenticator = authenticator;
-		this.authorizer = authorizer;
-		this.auditor = auditor;
-		this.httpRequestor = new BasicHttpRequestor();
-	}
-
-	/**
-	 * @param allowedHeaders the allowedHeaders to set
-	 */
-	public void setAllowedHeaders(Set<String> allowedHeaders) {
-		this.allowedHeaders = allowedHeaders;
-	}
-
-	/**
-	 * @param authenticator the authenticator to set
-	 */
-	public void setAuthenticator(Authenticator authenticator) {
-		this.authenticator = authenticator;
-	}
-
-	/**
-	 * @param authorizer the authorizer to set
-	 */
-	public void setAuthorizer(Authorizer authorizer) {
-		this.authorizer = authorizer;
-	}
-
-	public void setAuditor(Auditor auditor) {
-		this.auditor = auditor;
-	}
-
-	public void setSessionStore(SessionStore sessionStore) {
-		this.sessionStore = sessionStore;
-	}
-
-	/**
-	 * @param httpRequestor the httpRequestor to set
-	 */
-	public void setHttpRequestor(HttpRequestor httpRequestor) {
-		this.httpRequestor = httpRequestor;
-	}
 
 	/**
 	 * The handle method to be implemented for handling the request
@@ -164,25 +159,4 @@ public abstract class AbstractRequestHandler implements HttpRequestHandler {
 		 // copy over the response
 		 HttpUtils.copyResponse(responseForClient, context.getHttpResponse());
 	}
-	
-	/**
-	 * Strip-out the headers that are not in the allowed list
-	 * @param request The request to modify
-	 * @return A modified version of the request
-	 */
-	private HttpRequest whitelistRequest(HttpRequest request) {
-		HeaderIterator iterator = request.headerIterator();
-
-		// loop over the headers
-		while(iterator.hasNext()) {
-			Header h = iterator.nextHeader();
-			
-			// if the header is not in the allowed list, then remove it
-			if(!allowedHeaders.contains(h.getName()))
-				request.removeHeader(h);
-		}
-		
-		return request;	// return the request afters stripping headers
-	}
-	
 }

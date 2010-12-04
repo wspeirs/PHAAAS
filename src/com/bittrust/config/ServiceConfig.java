@@ -11,10 +11,11 @@ public class ServiceConfig {
 	private String url = "*";
 	private String host = "*";
 	
+	private BasicModuleConfig credentialConfig = null;
 	private BasicModuleConfig authenticationConfig = null;
 	private BasicModuleConfig authorizationConfig = null;
-	private BasicModuleConfig auditingConfig = null;
-	private BasicModuleConfig sessionConfig = null;
+	private BasicModuleConfig requestConfig = null;
+	private BasicModuleConfig responseConfig = null;
 
 	public String getUrl() {
 		return url;
@@ -30,6 +31,14 @@ public class ServiceConfig {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+
+	public BasicModuleConfig getCredentialConfig() {
+		return credentialConfig;
+	}
+
+	public void setCredentialConfig(BasicModuleConfig credentialConfig) {
+		this.credentialConfig = credentialConfig;
 	}
 
 	public BasicModuleConfig getAuthenticationConfig() {
@@ -48,19 +57,20 @@ public class ServiceConfig {
 		this.authorizationConfig = authorizationConfig;
 	}
 
-	public BasicModuleConfig getAuditingConfig() {
-		return auditingConfig;
+	public BasicModuleConfig getRequestConfig() {
+		return requestConfig;
 	}
 
-	public void setAuditingConfig(BasicModuleConfig auditingConfig) {
-		this.auditingConfig = auditingConfig;
+	public void setRequestConfig(BasicModuleConfig requestConfig) {
+		this.requestConfig = requestConfig;
 	}
 
-	public BasicModuleConfig getSessionConfig() {
-		return sessionConfig;
+	public BasicModuleConfig getResponseConfig() {
+		return responseConfig;
 	}
 
-	public void setSessionConfig(BasicModuleConfig sessionConfig) {
-		this.sessionConfig = sessionConfig;
+	public void setResponseConfig(BasicModuleConfig responseConfig) {
+		this.responseConfig = responseConfig;
 	}
+
 }

@@ -23,7 +23,7 @@ public class NullAuthorizer implements Authorizer {
 	
 	public NullAuthorizer(BasicModuleConfig config) {
 		this.config = config;
-		this.result = Boolean.parseBoolean(config.getParam("result"));
+		this.result = Boolean.parseBoolean(this.config.getParam("result"));
 	}
 	
 	/**

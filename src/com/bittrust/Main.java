@@ -9,9 +9,7 @@ import org.apache.http.HttpException;
 import com.bittrust.config.ServerConfig;
 import com.bittrust.config.ServiceConfig;
 import com.bittrust.http.server.HttpServer;
-import com.bittrust.http.server.handlers.ConfiguredHandler;
-import com.bittrust.http.server.handlers.FileServerHandler;
-import com.bittrust.http.server.handlers.PassThroughRequestHandler;
+import com.bittrust.http.server.handlers.PhaaasRequestHandler;
 
 public class Main {
 
@@ -37,7 +35,7 @@ public class Main {
 		
 		// go through each services and create a handler for it
 		for(ServiceConfig config:serviceConfigs) {
-			ConfiguredHandler ch = new ConfiguredHandler(config);
+			PhaaasRequestHandler ch = new PhaaasRequestHandler(config);
 			
 			server.setHandler(config.getUrl(), ch);
 		}

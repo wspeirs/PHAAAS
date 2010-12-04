@@ -14,6 +14,11 @@ public class ServerConfig {
 	private int threadCount = 10;
 	private ArrayList<ServiceConfig> serviceConfigs = new ArrayList<ServiceConfig>();
 	
+	// modules
+	private BasicModuleConfig sessionConfig = null;
+	private BasicModuleConfig auditConfig = null;
+
+	
 	public void setPort(short port) {
 		this.port = port;
 	}
@@ -37,4 +42,21 @@ public class ServerConfig {
 	public void addServiceConfig(ServiceConfig serviceConfig) {
 		this.serviceConfigs.add(serviceConfig);
 	}
+	
+	public BasicModuleConfig getSessionConfig() {
+		return sessionConfig;
+	}
+
+	public void setSessionConfig(BasicModuleConfig sessionConfig) {
+		this.sessionConfig = sessionConfig;
+	}
+
+	public BasicModuleConfig getAuditConfig() {
+		return auditConfig;
+	}
+
+	public void setAuditConfig(BasicModuleConfig auditConfig) {
+		this.auditConfig = auditConfig;
+	}
+
 }

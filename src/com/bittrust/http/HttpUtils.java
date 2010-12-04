@@ -5,6 +5,7 @@ package com.bittrust.http;
 
 import java.io.IOException;
 import java.net.HttpCookie;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.http.Header;
@@ -186,5 +187,25 @@ public class HttpUtils {
 		
 		return ret;
 	}
+	
+	/**
+	 * Strip-out the headers from a request
+	 * @param request The request to modify
+	 * @param headers The headers to remove.
+	 * @return A modified version of the request
+	 */
+	public static HttpRequest whitelistRequest(HttpRequest request, Set<String> headers) {
+		HeaderIterator iterator = request.headerIterator();
 
+		// loop over the headers
+		while(iterator.hasNext()) {
+			Header h = iterator.nextHeader();
+			
+			// if the header is not in the allowed list, then remove it
+			if(headers.contains(h.getName()))
+				request.removeHeader(h);
+		}
+		
+		return request;	// return the request afters stripping headers
+	}
 }

@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <server port="8080" threadCount="10">
+
+    <sessionStore className="com.bittrust.session.MemoryStore">
+    </sessionStore>
+
+    <auditing className="com.bittrust.auditing.ApacheStyle">
+    </auditing>
+        
     <service host="educated-solutions.com" url="*">
-        <!-- need to list the allowed headers here, otherwise we just let everything through -->
+        <credentialProvider className="com.bittrust.credential.providers.NullProvider">
+        </credentialProvider>
         
         <authentication className="com.bittrust.authentication.NullAuthenticator">
             <param name="result">true</param>
@@ -12,11 +20,11 @@
             <param name="result">true</param>
         </authorization>
 
-        <auditing className="com.bittrust.auditing.ApacheStyle">
-        </auditing>
-        
-        <session className="com.bittrust.session.MemoryStore">
-        </session>
+        <requestModifier className="com.bittrust.http.NullModifier">
+        </requestModifier>
+
+        <responseModifier className="com.bittrust.http.NullModifier">
+        </responseModifier>
     </service>
 
 </server>

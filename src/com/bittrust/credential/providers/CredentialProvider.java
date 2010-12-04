@@ -11,10 +11,16 @@ import com.bittrust.session.SessionStore;
  */
 public interface CredentialProvider {
 	
+	/**
+	 * The result type for a CredentialProvider.
+	 * 
+	 * Determines the course of action for the RequestHander.
+	 * @enum CredentialProviderResult
+	 */
 	enum CredentialProviderResult {
-		CREDENTIAL_FOUND,
-		PRINCIPAL_FOUND,
-		SEND_RESPONSE
+		CREDENTIAL_FOUND, /** A credential was found in the request. */
+		PRINCIPAL_FOUND,  /** A principal was found in the session store. */
+		SEND_RESPONSE     /** A response should be sent to the client for more interaction. */
 	}
 	
 	/**

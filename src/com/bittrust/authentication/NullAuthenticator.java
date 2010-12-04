@@ -5,10 +5,8 @@ package com.bittrust.authentication;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HttpContext;
 
 import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.credential.Principal;

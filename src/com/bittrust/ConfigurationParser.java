@@ -5,14 +5,11 @@ package com.bittrust;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.commons.digester.Digester;
 import org.xml.sax.SAXException;
 
-import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.config.ServerConfig;
-import com.bittrust.config.ServiceConfig;
 
 /**
  * @class ConfigurationParser
@@ -28,31 +25,40 @@ public class ConfigurationParser {
 		digester.addObjectCreate("server", "com.bittrust.config.ServerConfig");
 		digester.addSetProperties("server");
 		
+		// setup the digester for the session store
+		addBasicModuleConfig("server/sessionStore", "setSessionConfig");
+		
+		// setup the digester for the auditor
+		addBasicModuleConfig("server/auditing", "setAuditConfig");
+		
 		// setup the services
 		digester.addObjectCreate("server/service", "com.bittrust.config.ServiceConfig");
 		digester.addSetProperties("server/service");
 		digester.addSetNext("server/service", "addServiceConfig", "com.bittrust.config.ServiceConfig");
 		
+		// setup credential provider
+		addBasicModuleConfig("server/service/credentialProvider", "setCredentialConfig");
+		
 		// setup authentication
-		addBasicModuleConfig("authentication", "setAuthenticationConfig");
+		addBasicModuleConfig("server/service/authentication", "setAuthenticationConfig");
 		
 		// setup authorization
-		addBasicModuleConfig("authorization", "setAuthorizationConfig");
+		addBasicModuleConfig("server/service/authorization", "setAuthorizationConfig");
 
-		// setup auditing
-		addBasicModuleConfig("auditing", "setAuditingConfig");
+		// setup request modifier
+		addBasicModuleConfig("server/service/requestModifier", "setRequestConfig");
 		
-		// setup sessioning
-		addBasicModuleConfig("session", "setSessionConfig");
+		// setup response modifier
+		addBasicModuleConfig("server/service/responseModifier", "setResponseConfig");
 	}
 	
 	private void addBasicModuleConfig(String moduleName, String methodName) {
-		digester.addObjectCreate("server/service/" + moduleName, "com.bittrust.config.BasicModuleConfig");
-		digester.addSetProperties("server/service/" + moduleName);
-		digester.addSetNext("server/service/" + moduleName, methodName);
-		digester.addCallMethod("server/service/" + moduleName + "/param", "addParam", 2);
-		digester.addCallParam("server/service/" + moduleName + "/param", 0, "name");
-		digester.addCallParam("server/service/" + moduleName + "/param", 1);
+		digester.addObjectCreate(moduleName, "com.bittrust.config.BasicModuleConfig");
+		digester.addSetProperties(moduleName);
+		digester.addSetNext(moduleName, methodName);
+		digester.addCallMethod(moduleName + "/param", "addParam", 2);
+		digester.addCallParam(moduleName + "/param", 0, "name");
+		digester.addCallParam(moduleName + "/param", 1);
 	}
 	
 	public ServerConfig parse(File configFile) {

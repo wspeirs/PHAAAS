@@ -3,11 +3,6 @@
  */
 package com.bittrust.authorization;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
-
-import com.bittrust.credential.Principal;
 import com.bittrust.http.PhaaasContext;
 
 /**
