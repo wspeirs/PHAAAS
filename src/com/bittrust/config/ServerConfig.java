@@ -3,7 +3,12 @@
  */
 package com.bittrust.config;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+
+import com.bittrust.auditing.Auditor;
+import com.bittrust.credential.providers.CredentialProvider;
+import com.bittrust.session.SessionStore;
 
 /**
  * @class ServerConfig
@@ -15,8 +20,8 @@ public class ServerConfig {
 	private ArrayList<ServiceConfig> serviceConfigs = new ArrayList<ServiceConfig>();
 	
 	// modules
-	private BasicModuleConfig sessionConfig = null;
-	private BasicModuleConfig auditConfig = null;
+	private Auditor auditor = null;
+	private SessionStore sessionStore = null;
 
 	
 	public void setPort(short port) {
@@ -40,23 +45,56 @@ public class ServerConfig {
 	}
 
 	public void addServiceConfig(ServiceConfig serviceConfig) {
+		// add in the global auditor & sessionStore if not specified
+		if(serviceConfig.getAuditor() == null)
+			serviceConfig.setAuditor(auditor);
+		
+		if(serviceConfig.getSessionStore() == null)
+			serviceConfig.setSessionStore(sessionStore);
+		
 		this.serviceConfigs.add(serviceConfig);
 	}
 	
-	public BasicModuleConfig getSessionConfig() {
-		return sessionConfig;
-	}
-
 	public void setSessionConfig(BasicModuleConfig sessionConfig) {
-		this.sessionConfig = sessionConfig;
-	}
-
-	public BasicModuleConfig getAuditConfig() {
-		return auditConfig;
+		try {
+			Class<SessionStore> sessionClass = (Class<SessionStore>) Class.forName(sessionConfig.getClassName());
+			this.sessionStore = (SessionStore)sessionClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(sessionConfig);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void setAuditConfig(BasicModuleConfig auditConfig) {
-		this.auditConfig = auditConfig;
+		try {
+			Class<Auditor> auditClass = (Class<Auditor>) Class.forName(auditConfig.getClassName());
+			this.auditor = (Auditor)auditClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(auditConfig);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

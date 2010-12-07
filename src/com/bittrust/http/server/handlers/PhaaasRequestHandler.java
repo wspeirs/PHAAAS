@@ -38,8 +38,6 @@ import com.bittrust.session.SessionStore;
  */
 public class PhaaasRequestHandler implements HttpRequestHandler {
 	
-	private ServiceConfig serviceConfig = null;
-
 	// modules
 	private CredentialProvider credentialProvider;
 	private Authenticator authenticator;
@@ -47,6 +45,7 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 	private RequestModifier requestModifier;
 	private ResponseModifier responseModifier;
 	
+	// possibly global modules
 	private Auditor auditor;
 	private SessionStore sessionStore;
 	private HttpRequestor httpRequestor;	//TODO: Re-work this
@@ -54,7 +53,9 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 	private final static String SESSION_COOKIE = "PHAAASID";
 	
 	public PhaaasRequestHandler(ServiceConfig serviceConfig) throws Exception {
-		this.serviceConfig = serviceConfig;
+
+		this.auditor = serviceConfig.getAuditor();
+		this.sessionStore = serviceConfig.getSessionStore();
 		this.httpRequestor = new BasicHttpRequestor();
 		
 		try {
