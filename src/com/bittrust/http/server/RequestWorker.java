@@ -65,7 +65,7 @@ public class RequestWorker extends Thread{
 		while(connection.isOpen()) {
 			try {
 				// set the remote address in the context so we can audit it later
-				context.setAttribute("REMOTE_ADDR", connection.getRemoteAddress());
+				context.setAttribute("REMOTE_ADDRESS", connection.getRemoteAddress());
 				
 				httpService.handleRequest(connection, context);
 			} catch (IOException e) {
