@@ -4,6 +4,7 @@
 package com.bittrust.http;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -15,6 +16,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpContext;
@@ -185,6 +187,30 @@ public class HttpUtils {
 			ret = new BasicHttpResponse(pv, StatusCode.SERVER_ERROR.getCode(), StatusCode.SERVER_ERROR.getReason());
 		}
 		
+		return ret;
+	}
+	
+	/**
+	 * Create a response given a status code and entity body.
+	 * @param code The response code to use.
+	 * @param body The body/entity of the response.
+	 * @return A BasicHttpResponse which has it's connection set to closed and content-length set.
+	 */
+	public static BasicHttpResponse generateResponse(StatusCode code, String body) {
+		BasicHttpResponse ret = generateResponse(code);
+		
+		StringEntity entity = null;
+		
+		try {
+			entity = new StringEntity(body);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		ret.addHeader("Content-Length", entity.getContentLength() + "");
+		ret.addHeader("Connection", "close");
+		ret.setEntity(entity);
+
 		return ret;
 	}
 	

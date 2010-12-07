@@ -9,7 +9,8 @@
     </auditing>
         
     <service host="educated-solutions.com" url="*">
-        <credentialProvider className="com.bittrust.credential.providers.NullProvider">
+        <credentialProvider className="com.bittrust.credential.providers.BasicAuth">
+        <param name="realm">Test</param>
         </credentialProvider>
         
         <authentication className="com.bittrust.authentication.NullAuthenticator">

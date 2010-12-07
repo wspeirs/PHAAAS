@@ -3,6 +3,7 @@
  */
 package com.bittrust.credential;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,5 +35,13 @@ public class Credential {
 	 */
 	public String getProperty(String property) {
 		return properties.get(property);
+	}
+	
+	/**
+	 * Returns a copy of the properties.
+	 * @return A copy of the properties.
+	 */
+	public Map<String, String> getProperties() {
+		return new HashMap<String, String>(properties);	// we want this to be immutable
 	}
 }

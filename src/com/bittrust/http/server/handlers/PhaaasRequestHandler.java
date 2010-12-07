@@ -127,6 +127,8 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 			break;
 		case SEND_RESPONSE:		// we need to send a response back to the client
 			HttpUtils.copyResponse(response, context.getHttpResponse());
+			auditor.serverResponse(log, response);
+			auditor.writeLog(log);
 			return;
 		}
 
@@ -158,6 +160,9 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		 HttpResponse responseForClient = responseModifier.modifyResponse(context);
 		 
 		 // copy over the response
-		 HttpUtils.copyResponse(responseForClient, context.getHttpResponse());
+		 HttpUtils.copyResponse(response, responseForClient);
+		 
+		 auditor.serverResponse(log, response);
+		 auditor.writeLog(log);
 	}
 }

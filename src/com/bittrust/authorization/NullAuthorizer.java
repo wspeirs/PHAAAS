@@ -3,12 +3,13 @@
  */
 package com.bittrust.authorization;
 
-import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
 
 import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.credential.Credential;
+import com.bittrust.credential.Principal;
 import com.bittrust.http.HttpUtils;
 import com.bittrust.http.HttpUtils.StatusCode;
 import com.bittrust.http.PhaaasContext;
@@ -37,18 +38,15 @@ public class NullAuthorizer implements Authorizer {
 	@Override
 	public boolean authorize(PhaaasContext context) {
 		if(result == false) {
-			try {
-			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHORIZED);
-			StringEntity entity = new StringEntity("Authorization Failed");
-			
-			response.setHeader("Content-Length", entity.getContentLength()+"");
-			response.setEntity(entity);
+			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHORIZED, "Authorization Failed");
 			
 			// set the response in the context
 			context.setHttpResponse(response);
-			} catch(UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
+		} else {
+			Credential cred = context.getCredential();
+			Principal principal = new Principal(cred.getUserName(), cred.getProperties());
+			
+			context.setPrincipal(principal);
 		}
 		
 		return result;

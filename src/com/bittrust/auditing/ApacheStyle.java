@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.net.InetAddress;
 import java.util.Date;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
@@ -73,7 +74,14 @@ public class ApacheStyle implements Auditor {
 	public void serverResponse(StringBuilder sb, HttpResponse response) {
 		sb.append(response.getStatusLine().getStatusCode());
 		sb.append(" ");
-		sb.append(response.getEntity().getContentLength());
+		
+		HttpEntity entity = response.getEntity();
+		
+		// might not have an entity
+		if(entity == null)
+			sb.append(0);
+		else
+			sb.append(entity.getContentLength());
 	}
 
 	@Override

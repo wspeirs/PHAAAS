@@ -4,6 +4,7 @@
 package com.bittrust.credential;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,13 @@ public class Principal {
 	public Principal(String username) {
 		this.username = username;
 		this.groups = new HashSet<String>();
+		this.properties = new HashMap<String, Object>();
+	}
+	
+	public Principal(String username, Map properties) {
+		this.username = username;
+		this.groups = new HashSet<String>();
+		this.properties = properties;
 	}
 
 	/**
