@@ -12,10 +12,8 @@ import com.bittrust.config.BasicModuleConfig;
  * @class NullModifier
  */
 public class NullModifier implements RequestModifier, ResponseModifier {
-	private BasicModuleConfig config;
 
 	public NullModifier(BasicModuleConfig config) {
-		this.config = config;
 	}
 	
 	@Override

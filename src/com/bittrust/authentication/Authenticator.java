@@ -3,7 +3,6 @@
  */
 package com.bittrust.authentication;
 
-import com.bittrust.credential.Principal;
 import com.bittrust.http.PhaaasContext;
 
 /**

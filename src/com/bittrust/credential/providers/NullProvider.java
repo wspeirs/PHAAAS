@@ -14,10 +14,8 @@ import com.bittrust.session.SessionStore;
  * @class NullProvider
  */
 public class NullProvider implements CredentialProvider {
-	private BasicModuleConfig config;
 
 	public NullProvider(BasicModuleConfig config) {
-		this.config = config;
 	}
 	
 	@Override

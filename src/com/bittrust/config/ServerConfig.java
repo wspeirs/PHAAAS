@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import com.bittrust.auditing.Auditor;
-import com.bittrust.credential.providers.CredentialProvider;
 import com.bittrust.session.SessionStore;
 
 /**
