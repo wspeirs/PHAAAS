@@ -3,6 +3,7 @@
  */
 package com.bittrust.authentication;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -15,6 +16,7 @@ import javax.naming.ldap.LdapContext;
 import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.credential.Credential;
 import com.bittrust.credential.Principal;
+import com.bittrust.http.HttpUtils;
 import com.bittrust.http.PhaaasContext;
 
 /**
@@ -36,6 +38,21 @@ public class ActiveDirectory implements Authenticator {
 	public ActiveDirectory(BasicModuleConfig config) {
 		this.host = config.getParam("host");
 		this.baseDN = config.getParam("baseDN");
+	}
+	
+	public static void main(String[] args) {
+		ActiveDirectory ad = new ActiveDirectory("192.168.1.33", "dc=ad,dc=es,dc=com");
+		HashMap<String, String> p = new HashMap<String, String>();
+		
+		p.put("password", "test");
+		Credential cred = new Credential("test", p);
+		PhaaasContext context = new PhaaasContext(null);
+		
+		context.setCredential(cred);
+		if(ad.authenticate(context))
+			System.out.println("AUTHED");
+		else
+			System.out.println("UNAUTHED");
 	}
 
 	@Override
@@ -77,7 +94,12 @@ public class ActiveDirectory implements Authenticator {
 			context.setPrincipal(principal);
 			
 		} catch (NamingException e) {
-			e.printStackTrace();
+			StringBuilder sb = new StringBuilder("<html><head><title>Authentication Failed</title></head><body>");
+			
+			sb.append(e.getExplanation());
+			sb.append("</body></html>");
+			
+			context.setHttpResponse(HttpUtils.generateResponse(HttpUtils.StatusCode.UNAUTHENTICATED, sb.toString()));
 			return false;
 		}
 		
