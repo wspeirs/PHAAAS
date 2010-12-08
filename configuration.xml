@@ -13,7 +13,10 @@
         <param name="realm">Test</param>
         </credentialProvider>
         
+        <!--  <authentication className="com.bittrust.authentication.ActiveDirectory"> -->
         <authentication className="com.bittrust.authentication.NullAuthenticator">
+            <param name="host">192.168.1.33</param>
+            <param name="baseDN">dc=ad,dc=es,dc=com</param>
             <param name="result">true</param>
         </authentication>
 

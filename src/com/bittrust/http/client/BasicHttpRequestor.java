@@ -17,10 +17,15 @@ import org.apache.http.protocol.HttpContext;
  * @class BasicHttpRequestor
  */
 public class BasicHttpRequestor implements HttpRequestor {
+	
+	private DefaultHttpClient client;
+	
+	public BasicHttpRequestor() {
+		this.client = new DefaultHttpClient();
+	}
 
 	@Override
 	public HttpResponse request(HttpRequest request, HttpContext context) {
-		DefaultHttpClient client = new DefaultHttpClient();
 		String host = request.getFirstHeader("Host").getValue();
 		HttpHost httpHost = new HttpHost(host);
 		HttpResponse response = null;
