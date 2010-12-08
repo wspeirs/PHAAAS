@@ -58,7 +58,7 @@ public class ActiveDirectory implements Authenticator {
 	@Override
 	public boolean authenticate(PhaaasContext context) {
 		Credential credential = context.getCredential();
-		String username = credential.getUserName();
+		String username = credential.getUsername();
 		
 		ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
 		 
@@ -87,7 +87,7 @@ public class ActiveDirectory implements Authenticator {
 			Principal principal = new Principal(username);
 			
 			for(int i=0; i < attr.size(); ++i) {
-				System.out.println("GROUP: " + attr.get(i));
+//				System.out.println("GROUP: " + attr.get(i));
 				principal.addGroup(attr.get(i).toString());	// add the group to the principal
 			}
 			

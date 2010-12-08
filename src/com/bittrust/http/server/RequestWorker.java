@@ -8,9 +8,9 @@ import java.net.Socket;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponseFactory;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.DefaultHttpServerConnection;
+import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
@@ -57,7 +57,8 @@ public class RequestWorker extends Thread{
 	 */
 	public void run() {
 		HttpService httpService = new HttpService(this.processor,
-												  new DefaultConnectionReuseStrategy(),
+//												  new DefaultConnectionReuseStrategy(),
+												  new NoConnectionReuseStrategy(),
 												  this.responseFactory,
 												  this.resolver,
 												  this.params);
@@ -69,7 +70,7 @@ public class RequestWorker extends Thread{
 				
 				httpService.handleRequest(connection, context);
 			} catch (IOException e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 			} catch (HttpException e) {
 				System.err.println("HTTP EXCEPTION: " + e.getMessage());
 				e.printStackTrace();

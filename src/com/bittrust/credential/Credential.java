@@ -24,7 +24,7 @@ public class Credential {
 	 * Return the username for this credential.
 	 * @return The username for this credential.
 	 */
-	public String getUserName() {
+	public String getUsername() {
 		return username;
 	}
 	

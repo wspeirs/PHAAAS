@@ -11,7 +11,9 @@ import com.bittrust.credential.Principal;
  * Handles all sessioning
  */
 public interface SessionStore {
-
+	
+	public final static String SESSION_COOKIE = "PHAAASID";
+	
 	/**
 	 * Creates a new session storing the associated principal and returning the session ID.
 	 * @param principal The principal which is stored in the session.

@@ -134,7 +134,11 @@ public class HttpUtils {
 		// create a cookie
 		HttpCookie cookie = new HttpCookie(cookieName, cookieValue);
 
-		if(host != null) {
+		//
+		// TODO: This needs major fixing as the host parsing doesn't work well
+		//
+		
+		if(host != null && host.contains(".")) {
 			// parse out the last 2 parts of the host for the domain
 			int index = host.lastIndexOf('.');
 			index = host.lastIndexOf('.', index-1);

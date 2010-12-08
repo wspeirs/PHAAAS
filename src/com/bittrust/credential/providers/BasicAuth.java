@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 
 import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.credential.Credential;
+import com.bittrust.credential.Principal;
 import com.bittrust.http.HttpUtils;
 import com.bittrust.http.HttpUtils.StatusCode;
 import com.bittrust.http.PhaaasContext;
@@ -32,6 +33,16 @@ public class BasicAuth implements CredentialProvider {
 	public CredentialProviderResult getCredentialOrPrincipal(SessionStore sessionStore, PhaaasContext context) {
 		HttpRequest request = context.getHttpRequest();
 		Header authHeader = null;
+		
+		// first see if we have a session as it will save us processing time
+		String sessionId = HttpUtils.getCookie(request, SessionStore.SESSION_COOKIE);
+		Principal principal = null;
+		
+		if(sessionId != null && (principal = sessionStore.retrievePrincipal(sessionId)) != null) {
+			context.setPrincipal(principal);	// set the principal in the context
+			context.setSessionId(sessionId);	// set the session ID
+			return CredentialProviderResult.PRINCIPAL_FOUND;
+		}
 		
 		// make sure we have the authentication header and it's basic auth
 		if(null == (authHeader = request.getFirstHeader("Authorization")) ||

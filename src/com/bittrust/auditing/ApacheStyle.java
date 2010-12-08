@@ -45,16 +45,16 @@ public class ApacheStyle implements Auditor {
 
 	@Override
 	public void credentialFound(StringBuilder sb, Credential cred) {
-		sb.append(cred.getUserName());
+	}
+
+	@Override
+	public void principalFound(StringBuilder sb, Principal principal) {
+		sb.append(principal.getUsername());
 		sb.append(" [");
 		sb.append(new Date().toString());
 		sb.append("] \"");
 		sb.append(requestLine);
 		sb.append("\" ");
-	}
-
-	@Override
-	public void principalFound(StringBuilder sb, Principal principal) {
 	}
 
 	@Override

@@ -47,8 +47,6 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 	private SessionStore sessionStore;
 	private HttpRequestor httpRequestor;	//TODO: Re-work this
 	
-	private final static String SESSION_COOKIE = "PHAAASID";
-	
 	public PhaaasRequestHandler(ServiceConfig serviceConfig) throws Exception {
 
 		this.auditor = serviceConfig.getAuditor();
@@ -143,23 +141,28 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 			auditor.writeLog(log);
 			return;
 		}
+		
+		// at this point we have a good principal so we should make a session
+		// granted the user might not be authorized, but they did authenticate
+		String sessionId = context.getSessionId();
+		String host = context.getHttpRequest().getFirstHeader("Host").toString();
+		
+		// see if we've saved this principal yet, if not then save it
+		if(sessionId == null) {
+			System.out.println("CREATING NEW SESSION");
+			sessionId = sessionStore.createSession(context.getPrincipal());
+		}
 
 		// not authorized so copy the response and send it to the client
 		if(!isAuthorized) {
-			String sessionId = context.getSessionId();
 			HttpResponse unauthResponse = context.getHttpResponse();
 			
 			// log that authz failed
 			auditor.authorizationFailed(log, unauthResponse);
 			auditor.writeLog(log);
-			
-			// see if we've saved this principal yet, if not then save it
-			// at this point auth passed, so we want to save this session
-			if(sessionId == null) {
-				String host = context.getHttpRequest().getFirstHeader("Host").toString();
-				sessionId = sessionStore.createSession(context.getPrincipal());
-				HttpUtils.setCookie(unauthResponse, host, SESSION_COOKIE, sessionId);
-			}
+
+			// set the session cookie here
+			HttpUtils.setCookie(unauthResponse, host, SessionStore.SESSION_COOKIE, sessionId);
 			
 			// copy the response over
 			HttpUtils.copyResponse(response, unauthResponse);
@@ -174,6 +177,9 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		
 		// modify the response
 		 HttpResponse responseForClient = responseModifier.modifyResponse(context);
+		 
+		 // insert the session cookie
+		HttpUtils.setCookie(responseForClient, host, SessionStore.SESSION_COOKIE, sessionId);
 		 
 		 // copy over the response
 		 HttpUtils.copyResponse(response, responseForClient);

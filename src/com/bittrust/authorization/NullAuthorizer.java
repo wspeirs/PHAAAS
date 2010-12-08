@@ -42,11 +42,6 @@ public class NullAuthorizer implements Authorizer {
 			
 			// set the response in the context
 			context.setHttpResponse(response);
-		} else {
-			Credential cred = context.getCredential();
-			Principal principal = new Principal(cred.getUserName(), cred.getProperties());
-			
-			context.setPrincipal(principal);
 		}
 		
 		return result;
