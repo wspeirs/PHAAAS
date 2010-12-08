@@ -14,11 +14,11 @@ public interface Authenticator {
 	/**
 	 * Attempts to authenticate a user generating a principal upon successful authentication.
 	 * 
-	 * If the user is unsuccessfully authenticated then a proper response should be placed in
-	 * the context and the method should return null.
-	 * @param context The context of the authentication with contains the credential to authenticate.
-	 * @return The principal upon successful authentication, null upon unsuccessful authentication.
+	 * If the user successfully authenticates, then a principal is created and placed in the context.
+	 * If the user unsuccessfully authenticates, then a response is placed in the context.
+	 * @param context The context of the authentication which contains the credential to authenticate.
+	 * @return True if the user successfully authenticates, false otherwise.
 	 */
-	public Principal authenticate(PhaaasContext context);
+	public boolean authenticate(PhaaasContext context);
 	
 }

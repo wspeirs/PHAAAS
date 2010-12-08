@@ -13,60 +13,56 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
 import com.bittrust.config.BasicModuleConfig;
+import com.bittrust.credential.Credential;
+import com.bittrust.credential.Principal;
 
 /**
  * @class ApacheStyle
  */
 public class ApacheStyle implements Auditor {
 
-	private BasicModuleConfig config;
 	private File file;
+	private String requestLine;
 	
 	public ApacheStyle(BasicModuleConfig config) {
-		this.config = config;
+		this.file = new File(config.getParam("log_file"));
 	}
 	
 	@Override
 	public StringBuilder receivedConnection(InetAddress address) {
-		StringBuilder sb =  new StringBuilder();
+		StringBuilder sb =  new StringBuilder(address.toString());
 		
-		receivedConnection(sb, address);
-		
-		return sb;
-	}
-
-	@Override
-	public void receivedConnection(StringBuilder sb, InetAddress address) {
-		sb.append(address.toString());
 		sb.append(" - ");
-	}
-
-	@Override
-	public StringBuilder receivedRequest(HttpRequest request, String user) {
-		StringBuilder sb = new StringBuilder();
-		
-		receivedRequest(sb, request, user);
 		
 		return sb;
 	}
 
 	@Override
-	public void receivedRequest(StringBuilder sb, HttpRequest request, String user) {
-		sb.append(user);
+	public void receivedRequest(StringBuilder sb, HttpRequest request) {
+		requestLine = request.getRequestLine().toString();
+	}
+
+	@Override
+	public void credentialFound(StringBuilder sb, Credential cred) {
+		sb.append(cred.getUserName());
 		sb.append(" [");
 		sb.append(new Date().toString());
 		sb.append("] \"");
-		sb.append(request.getRequestLine().toString());
+		sb.append(requestLine);
 		sb.append("\" ");
 	}
 
 	@Override
-	public void authenticationFailed(StringBuilder sb, String user) {
+	public void principalFound(StringBuilder sb, Principal principal) {
+	}
+
+	@Override
+	public void authenticationFailed(StringBuilder sb, HttpResponse response) {
 		sb.append("AUTHENTICATION FAILED");
 	}
 
 	@Override
-	public void authorizationFailed(StringBuilder sb, String user) {
+	public void authorizationFailed(StringBuilder sb, HttpResponse response) {
 		sb.append("AUTHORIZATION FAILED");
 	}
 

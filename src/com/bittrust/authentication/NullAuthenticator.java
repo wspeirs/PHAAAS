@@ -36,26 +36,16 @@ public class NullAuthenticator implements Authenticator {
 	}
 
 	@Override
-	public Principal authenticate(PhaaasContext context) {
-		Principal ret = null;
-		
+	public boolean authenticate(PhaaasContext context) {
 		if(result) {
-			ret = new Principal("test");
+			context.setPrincipal(new Principal("test"));
 		} else {
-			try {
-			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHENTICATED);
-			StringEntity entity = new StringEntity("Authentication Failed");
-			
-			response.setHeader("Content-Length", entity.getContentLength()+"");
-			response.setEntity(entity);
+			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHENTICATED, "Authentication Failed"); 
 			
 			// set the response in the context
 			context.setHttpResponse(response);
-			} catch(UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
 		}
 		
-		return ret;
+		return result;
 	}
 }

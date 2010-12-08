@@ -39,10 +39,9 @@ public class ActiveDirectory implements Authenticator {
 	}
 
 	@Override
-	public Principal authenticate(PhaaasContext context) {
+	public boolean authenticate(PhaaasContext context) {
 		Credential credential = context.getCredential();
 		String username = credential.getUserName();
-		Principal principal = null;
 		
 		ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
 		 
@@ -68,17 +67,20 @@ public class ActiveDirectory implements Authenticator {
 			Attribute attr = attrs.get("memberOf");
 			
 			// create our new principal
-			principal = new Principal(username);
+			Principal principal = new Principal(username);
 			
 			for(int i=0; i < attr.size(); ++i) {
 				System.out.println("GROUP: " + attr.get(i));
 				principal.addGroup(attr.get(i).toString());	// add the group to the principal
 			}
 			
+			context.setPrincipal(principal);
+			
 		} catch (NamingException e) {
 			e.printStackTrace();
+			return false;
 		}
 		
-		return principal;
+		return true;
 	}
 }

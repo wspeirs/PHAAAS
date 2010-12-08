@@ -9,6 +9,9 @@ import java.net.InetAddress;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 
+import com.bittrust.credential.Credential;
+import com.bittrust.credential.Principal;
+
 /**
  * @class Auditor
  */
@@ -25,39 +28,40 @@ public interface Auditor {
 	public StringBuilder receivedConnection(InetAddress address);
 
 	/**
-	 * Log when we receive a connection from a host.
-	 * @param sb The StringBuilder to use.
-	 * @param address The address of the host that connected.
-	 */
-	public void receivedConnection(StringBuilder sb, InetAddress address);
-	
-	/**
 	 * Log when a request is received.
+	 * @param sb The log message.
 	 * @param request The request.
 	 * @return The StringBuilder containing the log thus far.
 	 */
-	public StringBuilder receivedRequest(HttpRequest request, String user);
+	public void receivedRequest(StringBuilder sb, HttpRequest request);
 	
 	/**
-	 * Log when a request is received with a pre-made StringBuilder.
-	 * @param sb The StringBuilder to use.
-	 * @param request The request.
+	 * Log that we got a credential from the request.
+	 * @param sb The log message.
+	 * @param cred The credential.
 	 */
-	public void receivedRequest(StringBuilder sb, HttpRequest request, String user);
+	public void credentialFound(StringBuilder sb, Credential cred);
 	
 	/**
-	 * Log a failed authentication.
-	 * @param sb The StringBuilder to use.
-	 * @param user The user who failed auth.
+	 * Log that we found a principal (or created a new one).
+	 * @param sb The log message.
+	 * @param principal The principal.
 	 */
-	public void authenticationFailed(StringBuilder sb, String user);
+	public void principalFound(StringBuilder sb, Principal principal);
 	
 	/**
-	 * Log a failed authenorization.
-	 * @param sb The StringBuilder to use.
-	 * @param user The user who failed authz.
+	 * Log the fact that authentication failed.
+	 * @param sb The log message.
+	 * @param response The response to be sent back to the client.
 	 */
-	public void authorizationFailed(StringBuilder sb, String user);
+	public void authenticationFailed(StringBuilder sb, HttpResponse response);
+	
+	/**
+	 * Log the fact that authorization failed.
+	 * @param sb The log message.
+	 * @param response The response to be sent back to the client.
+	 */
+	public void authorizationFailed(StringBuilder sb, HttpResponse response);
 	
 	/**
 	 * Log the response from a server.

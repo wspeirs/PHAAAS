@@ -107,8 +107,9 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 	 */
 	public final void handle(HttpRequest request, HttpResponse response, HttpContext httpContext) throws HttpException, IOException {
 		
-		// log the connection
+		// log the connection & the request
 		StringBuilder log = auditor.receivedConnection((InetAddress)httpContext.getAttribute("REMOTE_ADDRESS"));
+		auditor.receivedRequest(log, request);
 		
 		// create the PhaaasContext
 		PhaaasContext context = new PhaaasContext(httpContext, request);
@@ -121,8 +122,22 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		// based upon the result we do different things
 		switch(credRes) {
 		case CREDENTIAL_FOUND:	// creds found, continue with auth
-			context.setPrincipal(authenticator.authenticate(context));
+			auditor.credentialFound(log, context.getCredential());	// log the fact that we got the creds
+			
+			// try to authenticate the user
+			if(!authenticator.authenticate(context)) {
+				HttpResponse ret = context.getHttpResponse();
+				
+				auditor.authenticationFailed(log, ret);
+				auditor.writeLog(log);
+				
+				HttpUtils.copyResponse(response, ret);	// copy the response to send to the client
+				return;
+			}
+			
+		// if the auth works, we fall-through here
 		case PRINCIPAL_FOUND:	// we have a principal from a previous authentication or from the authenticator
+			auditor.principalFound(log, context.getPrincipal());
 			isAuthorized = authorizer.authorize(context);
 			break;
 		case SEND_RESPONSE:		// we need to send a response back to the client
@@ -136,6 +151,10 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		if(!isAuthorized) {
 			String sessionId = context.getSessionId();
 			HttpResponse unauthResponse = context.getHttpResponse();
+			
+			// log that authz failed
+			auditor.authorizationFailed(log, unauthResponse);
+			auditor.writeLog(log);
 			
 			// see if we've saved this principal yet, if not then save it
 			// at this point auth passed, so we want to save this session
@@ -162,6 +181,7 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		 // copy over the response
 		 HttpUtils.copyResponse(response, responseForClient);
 		 
+		 // log the response
 		 auditor.serverResponse(log, response);
 		 auditor.writeLog(log);
 	}
