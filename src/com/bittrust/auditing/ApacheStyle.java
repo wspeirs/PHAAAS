@@ -25,12 +25,13 @@ public class ApacheStyle implements Auditor {
 	private String requestLine;
 	
 	public ApacheStyle(BasicModuleConfig config) {
-		this.file = new File(config.getParam("log_file"));
+		if(config.getParam("log_file") != null)
+			this.file = new File(config.getParam("log_file"));
 	}
 	
 	@Override
 	public StringBuilder receivedConnection(InetAddress address) {
-		StringBuilder sb =  new StringBuilder(address.toString());
+		StringBuilder sb =  new StringBuilder(address.getHostAddress().toString());
 		
 		sb.append(" - ");
 		

@@ -28,7 +28,12 @@ public class BasicModuleConfig {
 	}
 	
 	public String getParam(String param) {
-		return params.get(param).get(0);
+		List<String> list = params.get(param);
+		
+		if(list != null)
+			return list.get(0);
+		else
+			return null;
 	}
 	
 	public void addParam(String param, String value) {
