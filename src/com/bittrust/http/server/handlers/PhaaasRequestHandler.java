@@ -47,11 +47,11 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 	private SessionStore sessionStore;
 	private HttpRequestor httpRequestor;	//TODO: Re-work this
 	
-	public PhaaasRequestHandler(ServiceConfig serviceConfig) throws Exception {
+	public PhaaasRequestHandler(ServiceConfig serviceConfig, HttpRequestor requestor) throws Exception {
 
 		this.auditor = serviceConfig.getAuditor();
 		this.sessionStore = serviceConfig.getSessionStore();
-		this.httpRequestor = new BasicHttpRequestor();
+		this.httpRequestor = requestor;
 		
 		try {
 			// setup the credential provider
@@ -173,7 +173,7 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		HttpRequest modifiedRequest = requestModifier.modifyRequest(context);
 		
 		// send the request to the server
-		context.setHttpResponse(HttpUtils.makeRequest(modifiedRequest, context));
+		context.setHttpResponse(httpRequestor.request(modifiedRequest, context));
 		
 		// modify the response
 		 HttpResponse responseForClient = responseModifier.modifyResponse(context);

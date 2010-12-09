@@ -18,6 +18,7 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.HttpContext;
 
@@ -96,31 +97,6 @@ public class HttpUtils {
 		
 		// copy over the entity
 		responseToClient.setEntity(responseFromServer.getEntity());
-	}
-	
-	/**
-	 * Makes an HTTP request and returns the result.
-	 * @param request The request to make.
-	 * @param context The context of the request.
-	 * @return The response from the request or null if an error occured.
-	 */
-	public static HttpResponse makeRequest(HttpRequest request, HttpContext context) {
-		DefaultHttpClient client = new DefaultHttpClient();
-		String host = request.getFirstHeader("Host").getValue();
-		HttpHost httpHost = new HttpHost(host);
-		HttpResponse response = null;
-		
-		try {
-			response = client.execute(httpHost, request, context);
-			
-		} catch (ClientProtocolException e) {
-			System.err.println("REQUEST: " + request.getRequestLine());
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return response;
 	}
 	
 	/**
