@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.digester.Digester;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.bittrust.config.ServerConfig;
 
@@ -74,17 +76,11 @@ public class ConfigurationParser {
 			sc = (ServerConfig)digester.parse(configFile);
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (SAXException e) {
-			e.printStackTrace();
+			System.err.println("ERROR PARSING CONFIG FILE: " + e.getLocalizedMessage());
 		}
 		
 		return sc;
-	}
-	
-	public static void main(String[] args) {
-		
-		
-
 	}
 }
