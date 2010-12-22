@@ -37,7 +37,7 @@ public class Main {
 		
 		// go through each services and create a handler for it
 		for(ServiceConfig config:serviceConfigs) {
-			HttpRequestor requestor = new BasicHttpRequestor();	// this will come from the config at some point
+			HttpRequestor requestor = new BasicHttpRequestor(config.getHost());	// this will come from the config at some point
 			PhaaasRequestHandler ch = new PhaaasRequestHandler(config, requestor);
 			
 			server.setHandler(config.getUrl(), ch);

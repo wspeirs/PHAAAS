@@ -28,10 +28,19 @@ public class BasicHttpRequestor implements HttpRequestor {
 	
 	private DefaultHttpClient client;
 	private ThreadSafeClientConnManager connManager;
+	private final HttpHost httpHost;
 	
-	public BasicHttpRequestor() {
+	public BasicHttpRequestor(String host) {
 		HttpParams params = new SyncBasicHttpParams();
 		SchemeRegistry registry = new SchemeRegistry();
+		
+		// setup the host for this requestor
+		if(host.contains(":")) {
+			int i = host.indexOf(":");
+			httpHost = new HttpHost(host.substring(0, i), Integer.parseInt(host.substring(i+1)));
+		} else {
+			httpHost = new HttpHost(host);
+		}
 		
 		// this should be specified in the config
 		params.setIntParameter(ConnManagerPNames.MAX_TOTAL_CONNECTIONS, 10);
@@ -46,9 +55,10 @@ public class BasicHttpRequestor implements HttpRequestor {
 
 	@Override
 	public HttpResponse request(HttpRequest request, HttpContext context) {
-		String host = request.getFirstHeader("Host").getValue();
-		HttpHost httpHost = new HttpHost(host);
 		HttpResponse response = null;
+		
+		// set the hostname
+		request.setHeader("Host", httpHost.getHostName());
 		
 		try {
 			response = client.execute(httpHost, request, context);

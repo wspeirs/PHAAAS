@@ -12,5 +12,11 @@ import org.apache.http.protocol.HttpContext;
  */
 public interface HttpRequestor {
 
+	/**
+	 * Makes a request to the given host.
+	 * @param request The HTTP request to send to the host.
+	 * @param context The context for which the HTTP request should operate in.
+	 * @return The response from the server.
+	 */
 	public HttpResponse request(HttpRequest request, HttpContext context);
 }
