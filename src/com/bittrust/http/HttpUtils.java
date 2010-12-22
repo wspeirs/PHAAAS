@@ -3,24 +3,20 @@
  */
 package com.bittrust.http;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.protocol.HttpContext;
 
 /**
  * @class HttpUtils
@@ -115,11 +111,16 @@ public class HttpUtils {
 		//
 		
 		if(host != null && host.contains(".")) {
-			// parse out the last 2 parts of the host for the domain
-			int index = host.lastIndexOf('.');
-			index = host.lastIndexOf('.', index-1);
+			String hostName = host;
 			
-			cookie.setDomain(host.substring(index, host.length()));
+			// parse out the last 2 parts of the host for the domain
+			int index = hostName.lastIndexOf('.');
+			index = hostName.lastIndexOf('.', index-1);
+			
+			if(index == -1)
+				return;
+			
+			cookie.setDomain(hostName.substring(index, hostName.length()));
 		}
 
 		// setup the cookie
