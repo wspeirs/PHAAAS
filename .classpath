@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="commons-logging.properties"/>
 	<classpathentry kind="lib" path="lib/json-rpc-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
