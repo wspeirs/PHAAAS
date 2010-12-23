@@ -5,6 +5,7 @@ package com.bittrust.auditing;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
 
@@ -21,12 +22,13 @@ import com.bittrust.credential.Principal;
  */
 public class ApacheStyle implements Auditor {
 
-	private File file;
+	private FileWriter fileWriter;
 	private String requestLine;
 	
 	public ApacheStyle(BasicModuleConfig config) {
 		if(config.getParam("log_file") != null)
-			this.file = new File(config.getParam("log_file"));
+			try { fileWriter = new FileWriter(new File(config.getParam("log_file"))); }
+			catch (IOException e) {	e.printStackTrace(); }
 	}
 	
 	@Override
@@ -83,17 +85,14 @@ public class ApacheStyle implements Auditor {
 
 	@Override
 	public void writeLog(StringBuilder sb) {
-		if(file == null) {	// just write to STDOUT
+		if(fileWriter == null) {	// just write to STDOUT
 			System.out.println(sb.toString());
 		} else {
+			sb.append("\n");
 			try {
-				FileWriter fw = new FileWriter(file);
-				
-				sb.append("\n");
-				
-				fw.write(sb.toString());
-			} catch (Exception e) {
-				System.err.println("COULD NOT WRITE TO: " + file.getAbsolutePath() + " BECAUSE: " + e.getLocalizedMessage());
+				fileWriter.write(sb.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}

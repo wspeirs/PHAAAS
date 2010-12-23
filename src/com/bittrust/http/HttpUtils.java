@@ -5,8 +5,6 @@ package com.bittrust.http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -186,6 +184,7 @@ public class HttpUtils {
 			entity = new StringEntity(body);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			return ret;
 		}
 		
 		ret.addHeader("Content-Length", entity.getContentLength() + "");

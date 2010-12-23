@@ -73,7 +73,7 @@ public class ServerConfig {
 		if(requestConfig != null && serviceConfig.getRequestConfig() == null)
 			serviceConfig.setRequestConfig(requestConfig);
 		
-		if(responseConfig != null & serviceConfig.getResponseConfig() == null)
+		if(responseConfig != null && serviceConfig.getResponseConfig() == null)
 			serviceConfig.setResponseConfig(responseConfig);
 		
 		this.serviceConfigs.add(serviceConfig);
@@ -133,6 +133,7 @@ public class ServerConfig {
 
 	public void setSessionConfig(BasicModuleConfig sessionConfig) {
 		try {
+			@SuppressWarnings("unchecked")
 			Class<SessionStore> sessionClass = (Class<SessionStore>) Class.forName(sessionConfig.getClassName());
 			this.sessionStore = (SessionStore)sessionClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(sessionConfig);
 		} catch (ClassNotFoundException e) {
@@ -154,6 +155,7 @@ public class ServerConfig {
 
 	public void setAuditConfig(BasicModuleConfig auditConfig) {
 		try {
+			@SuppressWarnings("unchecked")
 			Class<Auditor> auditClass = (Class<Auditor>) Class.forName(auditConfig.getClassName());
 			this.auditor = (Auditor)auditClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(auditConfig);
 		} catch (ClassNotFoundException e) {

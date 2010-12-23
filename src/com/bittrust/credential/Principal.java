@@ -24,7 +24,7 @@ public class Principal {
 		this.properties = new HashMap<String, Object>();
 	}
 	
-	public Principal(String username, Map properties) {
+	public Principal(String username, Map<String, Object> properties) {
 		this.username = username;
 		this.groups = new HashSet<String>();
 		this.properties = properties;

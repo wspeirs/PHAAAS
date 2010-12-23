@@ -24,7 +24,6 @@ import com.bittrust.http.HttpUtils;
 import com.bittrust.http.PhaaasContext;
 import com.bittrust.http.RequestModifier;
 import com.bittrust.http.ResponseModifier;
-import com.bittrust.http.client.BasicHttpRequestor;
 import com.bittrust.http.client.HttpRequestor;
 import com.bittrust.session.SessionStore;
 
@@ -55,22 +54,27 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		
 		try {
 			// setup the credential provider
+			@SuppressWarnings("unchecked")
 			Class<CredentialProvider> credClass = (Class<CredentialProvider>) Class.forName(serviceConfig.getCredentialConfig().getClassName());
 			this.credentialProvider = (CredentialProvider)credClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getCredentialConfig());
 
 			// setup the authenticator
+			@SuppressWarnings("unchecked")
 			Class<Authenticator> authClass = (Class<Authenticator>) Class.forName(serviceConfig.getAuthenticationConfig().getClassName());
 			this.authenticator = (Authenticator)authClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthenticationConfig());
 
 			// setup the authorizer
+			@SuppressWarnings("unchecked")
 			Class<Authorizer> authzClass = (Class<Authorizer>) Class.forName(serviceConfig.getAuthorizationConfig().getClassName());
 			this.authorizer = (Authorizer)authzClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthorizationConfig());
 
 			// setup the request modifier
+			@SuppressWarnings("unchecked")
 			Class<RequestModifier> requestClass = (Class<RequestModifier>) Class.forName(serviceConfig.getRequestConfig().getClassName());
 			this.requestModifier = (RequestModifier)requestClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getRequestConfig());
 
 			// setup the response modifier
+			@SuppressWarnings("unchecked")
 			Class<ResponseModifier> responseClass = (Class<ResponseModifier>) Class.forName(serviceConfig.getResponseConfig().getClassName());
 			this.responseModifier = (ResponseModifier)responseClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getResponseConfig());
 
