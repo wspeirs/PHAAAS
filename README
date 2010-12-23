@@ -2,5 +2,17 @@ Welcome to PHAAAS
 
 What is PHAAAS?
 
-PHAAAS stands for: The Plugable Http Authentication, Authorization, and Auditing System. Basically it is a plugable HTTP proxy that provides customized authentication, authorization, and auditing of HTTP resources.
+PHAAAS stands for: The Plugable Http Authentication, Authorization, and Auditing
+System. Basically it is a plugable HTTP proxy that provides customized
+authentication, authorization, and auditing of HTTP resources.
 
+
+Building
+
+It is highly recommended to do development using Eclipse. The .classpath file is
+included in the git repository for this reason.
+
+You can build PHAAAS by using the included ant script:
+	ant: compiles all the source
+	ant check: compiles the source, then checks the configuration file
+	ant jar: builds a standalone JAR file
