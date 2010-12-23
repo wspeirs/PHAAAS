@@ -27,11 +27,17 @@ public class ConfigurationParser {
 		digester.addObjectCreate("server", "com.bittrust.config.ServerConfig");
 		digester.addSetProperties("server");
 		
-		// setup the digester for the session store
+		// get the global session and auditor configs
 		addBasicModuleConfig("server/sessionStore", "setSessionConfig");
-		
-		// setup the digester for the auditor
 		addBasicModuleConfig("server/auditing", "setAuditConfig");
+		
+		// get defaults for all other modules
+		addBasicModuleConfig("server/credentialProvider", "setCredentialConfig");
+		addBasicModuleConfig("server/authentication", "setAuthenticationConfig");
+		addBasicModuleConfig("server/authorization", "setAuthorizationConfig");
+		addBasicModuleConfig("server/requestModifier", "setRequestConfig");
+		addBasicModuleConfig("server/responseModifier", "setResponseConfig");
+		
 		
 		// setup the services
 		digester.addObjectCreate("server/service", "com.bittrust.config.ServiceConfig");

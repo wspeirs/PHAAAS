@@ -59,6 +59,47 @@ public class Main {
 			System.err.println("Invalid configuration file");
 			return;
 		}
+		
+		// see if the user just wants to check the config file
+		if(commandLine.hasOption("check")) {
+			System.out.println("*** SERVER ***");
+			System.out.println("    HTTP PORT: " + sc.getPort());
+			System.out.println(" THREAD COUNT: " + sc.getThreadCount());
+			
+			// print out the global auditor & session store
+			if(sc.getAuditor() == null) {
+				System.out.println("NO AUDITOR SET!!!");
+				return;
+			} else {
+				System.out.println("      AUDITOR: " + sc.getAuditor().getClass().getCanonicalName());
+			}
+			
+			if(sc.getSessionStore() == null) {
+				System.out.println("NO SESSION STORE SET!!!");
+				return;
+			} else {
+				System.out.println("SESSION STORE: " + sc.getSessionStore().getClass().getCanonicalName());
+			}
+			
+			System.out.println();
+			System.out.println("*** SERVICES ***");
+			System.out.println();
+
+			// go through the services
+			for(ServiceConfig config:sc.getServiceConfigs()) {
+				System.out.println("     SERVICE HOST: " + config.getHost());
+				System.out.println("      URL PATTERN: " + config.getUrl());
+				System.out.println("    CRED PROVIDER: " + config.getCredentialConfig().getClassName());
+				System.out.println("    AUTHENTICATOR: " + config.getAuthenticationConfig().getClassName());
+				System.out.println("       AUTHORIZER: " + config.getAuthorizationConfig().getClassName());
+				System.out.println(" REQUEST MODIFIER: " + config.getRequestConfig().getClassName());
+				System.out.println("RESPONSE MODIFIER: " + config.getResponseConfig().getClassName());
+				
+				System.out.println();
+			}
+			
+			return;
+		}
 
 		// setup the server
 		HttpServer server = new HttpServer(sc.getPort(), sc.getThreadCount());
@@ -67,7 +108,7 @@ public class Main {
 		
 		// go through each services and create a handler for it
 		for(ServiceConfig config:serviceConfigs) {
-			HttpRequestor requestor = new BasicHttpRequestor(config.getHost());	// this will come from the config at some point
+			HttpRequestor requestor = new BasicHttpRequestor(config.getHost());
 			PhaaasRequestHandler ch = new PhaaasRequestHandler(config, requestor);
 			
 			server.setHandler(config.getUrl(), ch);

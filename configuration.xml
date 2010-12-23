@@ -2,33 +2,28 @@
 
 <server port="8080" threadCount="10">
 
-    <sessionStore className="com.bittrust.session.MemoryStore">
-    </sessionStore>
+    <sessionStore className="com.bittrust.session.MemoryStore"/>
 
-    <auditing className="com.bittrust.auditing.ApacheStyle">
-    </auditing>
-        
-    <service host="educated-solutions.com" url="*">
-        <credentialProvider className="com.bittrust.credential.providers.BasicAuth">
-        <param name="realm">Test</param>
-        </credentialProvider>
-        
-        <!--  <authentication className="com.bittrust.authentication.ActiveDirectory"> -->
-        <authentication className="com.bittrust.authentication.NullAuthenticator">
+    <auditing className="com.bittrust.auditing.ApacheStyle"/>
+
+    <!-- Default modules for all services -->
+    <credentialProvider className="com.bittrust.credential.providers.NullProvider"/>
+    <authentication className="com.bittrust.authentication.NullAuthenticator">
+        <param name="result">true</param>
+    </authentication>
+    <authorization className="com.bittrust.authorization.NullAuthorizer">
+        <param name="result">true</param>
+    </authorization>
+    <requestModifier className="com.bittrust.http.NullModifier"/>
+    <responseModifier className="com.bittrust.http.NullModifier"/>
+
+    <service host="bittrust.com" url="/bittrust/*">
+        <authentication className="com.bittrust.authentication.ActiveDirectory">
             <param name="host">192.168.1.33</param>
             <param name="baseDN">dc=ad,dc=es,dc=com</param>
-            <param name="result">true</param>
         </authentication>
-
-        <authorization className="com.bittrust.authorization.NullAuthorizer">
-            <param name="result">true</param>
-        </authorization>
-
-        <requestModifier className="com.bittrust.http.NullModifier">
-        </requestModifier>
-
-        <responseModifier className="com.bittrust.http.NullModifier">
-        </responseModifier>
     </service>
+
+    <service host="google.com" url="/google/*"/>
 
 </server>

@@ -18,9 +18,18 @@ public class ServerConfig {
 	private int threadCount = 10;
 	private ArrayList<ServiceConfig> serviceConfigs = new ArrayList<ServiceConfig>();
 	
-	// modules
+	// global modules
+	// these are shared across all services, unless one is specified for the service
 	private Auditor auditor = null;
 	private SessionStore sessionStore = null;
+	
+	// default modules
+	// these are created for each individual service
+	private BasicModuleConfig credentialConfig = null;
+	private BasicModuleConfig authenticationConfig = null;
+	private BasicModuleConfig authorizationConfig = null;
+	private BasicModuleConfig requestConfig = null;
+	private BasicModuleConfig responseConfig = null;
 
 	
 	public void setPort(short port) {
@@ -51,9 +60,77 @@ public class ServerConfig {
 		if(serviceConfig.getSessionStore() == null)
 			serviceConfig.setSessionStore(sessionStore);
 		
+		// add in the default modules if not specified
+		if(credentialConfig != null && serviceConfig.getCredentialConfig() == null)
+			serviceConfig.setCredentialConfig(credentialConfig);
+		
+		if(authenticationConfig != null && serviceConfig.getAuthenticationConfig() == null)
+			serviceConfig.setAuthenticationConfig(authenticationConfig);
+		
+		if(authorizationConfig != null && serviceConfig.getAuthorizationConfig() == null)
+			serviceConfig.setAuthorizationConfig(authorizationConfig);
+		
+		if(requestConfig != null && serviceConfig.getRequestConfig() == null)
+			serviceConfig.setRequestConfig(requestConfig);
+		
+		if(responseConfig != null & serviceConfig.getResponseConfig() == null)
+			serviceConfig.setResponseConfig(responseConfig);
+		
 		this.serviceConfigs.add(serviceConfig);
 	}
 	
+	public Auditor getAuditor() {
+		return auditor;
+	}
+
+	public SessionStore getSessionStore() {
+		return sessionStore;
+	}
+
+	public BasicModuleConfig getCredentialConfig() {
+		return credentialConfig;
+	}
+
+	public void setCredentialConfig(BasicModuleConfig credentialConfig) {
+		this.credentialConfig = credentialConfig;
+	}
+
+	public BasicModuleConfig getAuthenticationConfig() {
+		return authenticationConfig;
+	}
+
+	public void setAuthenticationConfig(BasicModuleConfig authenticationConfig) {
+		this.authenticationConfig = authenticationConfig;
+	}
+
+	public BasicModuleConfig getAuthorizationConfig() {
+		return authorizationConfig;
+	}
+
+	public void setAuthorizationConfig(BasicModuleConfig authorizationConfig) {
+		this.authorizationConfig = authorizationConfig;
+	}
+
+	public BasicModuleConfig getRequestConfig() {
+		return requestConfig;
+	}
+
+	public void setRequestConfig(BasicModuleConfig requestConfig) {
+		this.requestConfig = requestConfig;
+	}
+
+	public BasicModuleConfig getResponseConfig() {
+		return responseConfig;
+	}
+
+	public void setResponseConfig(BasicModuleConfig responseConfig) {
+		this.responseConfig = responseConfig;
+	}
+
+	public void setServiceConfigs(ArrayList<ServiceConfig> serviceConfigs) {
+		this.serviceConfigs = serviceConfigs;
+	}
+
 	public void setSessionConfig(BasicModuleConfig sessionConfig) {
 		try {
 			Class<SessionStore> sessionClass = (Class<SessionStore>) Class.forName(sessionConfig.getClassName());
