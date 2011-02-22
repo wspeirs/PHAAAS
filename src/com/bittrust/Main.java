@@ -127,9 +127,9 @@ public class Main {
 
 		// setup the configuration file option
 		@SuppressWarnings("static-access")
-		Option configOption = OptionBuilder.withArgName("configuration.xml")
-										   .withLongOpt("config")
+		Option configOption = OptionBuilder.withLongOpt("config")
 										   .hasArg()
+										   .withArgName("configuration.xml")
 										   .withDescription("Configuration file")
 										   .create("c");
 		// create the check option
@@ -138,9 +138,18 @@ public class Main {
 										  .withDescription("Check the configuration file")
 										  .create();
 
+		// create the plugins directory option
+		@SuppressWarnings("static-access")
+		Option pluginsOption = OptionBuilder.withLongOpt("plugins-dir")
+										    .hasArg()
+										    .withArgName("/path/to/plugins")
+										    .withDescription("Path to the plugins directory")
+										    .create("p");
+
 		// add all the options from above
 		options.addOption(configOption);
 		options.addOption(checkOption);
+		options.addOption(pluginsOption);
 
 		// add new simple options
 		options.addOption(new Option("h", "help", false, "Print this help message"));
