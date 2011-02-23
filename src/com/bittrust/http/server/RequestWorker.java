@@ -71,12 +71,13 @@ public class RequestWorker extends Thread{
 				httpService.handleRequest(connection, context);
 			} catch (IOException e) {
 				System.err.println("IO EXCEPTION: " + e.getMessage());
-				e.printStackTrace();
 				try { connection.close(); } catch (IOException e1) { ; }
 				return;
 			} catch (HttpException e) {
 				System.err.println("HTTP EXCEPTION: " + e.getMessage());
 				e.printStackTrace();
+				try { connection.close(); } catch (IOException e1) { ; }
+				return;
 			}
 		}
 	}
