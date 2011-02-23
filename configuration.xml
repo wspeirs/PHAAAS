@@ -7,23 +7,22 @@
     <auditing className="com.bittrust.auditing.ApacheStyle"/>
 
     <!-- Default modules for all services -->
-    <credentialProvider className="com.bittrust.credential.providers.NullProvider"/>
+    <credentialProvider className="com.bittrust.credential.providers.NullProvider">
+    	<param name="username">jsmith</param>
+    </credentialProvider>
+    
     <authentication className="com.bittrust.authentication.NullAuthenticator">
         <param name="result">true</param>
     </authentication>
+    
     <authorization className="com.bittrust.authorization.NullAuthorizer">
         <param name="result">true</param>
     </authorization>
+    
     <requestModifier className="com.bittrust.http.NullModifier"/>
+    
     <responseModifier className="com.bittrust.http.NullModifier"/>
 
-    <service host="bittrust.com" url="/bittrust/*">
-        <authentication className="com.bittrust.authentication.ActiveDirectory">
-            <param name="host">192.168.1.33</param>
-            <param name="baseDN">dc=ad,dc=es,dc=com</param>
-        </authentication>
-    </service>
-
-    <service host="google.com" url="/google/*"/>
+    <service host="*" url="*"/>
 
 </server>
