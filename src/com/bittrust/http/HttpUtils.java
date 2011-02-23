@@ -83,6 +83,9 @@ public class HttpUtils {
 	 * @param responseFromServer The response from the server
 	 */
 	public static void copyResponse(HttpResponse responseToClient, HttpResponse responseFromServer) {
+		if(responseToClient == null || responseFromServer == null)
+			return;
+		
 		// copy over the status line
 		responseToClient.setStatusLine(responseFromServer.getStatusLine());
 		
