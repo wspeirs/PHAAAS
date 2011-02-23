@@ -14,6 +14,7 @@ import org.apache.http.conn.params.ConnManagerPNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
@@ -47,7 +48,7 @@ public class BasicHttpRequestor implements HttpRequestor {
 		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		
 		registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-		registry.register(new Scheme("https", PlainSocketFactory.getSocketFactory(), 443));
+		registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 		
 		this.connManager = new ThreadSafeClientConnManager(params, registry);
 		this.client = new DefaultHttpClient(this.connManager, params);
