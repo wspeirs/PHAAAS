@@ -70,10 +70,8 @@ public class ProxyHttpRequestor implements HttpRequestor {
 		
 		try {
 			response = client.execute(httpHost, request, context);
-			
 		} catch (ClientProtocolException e) {
-			System.err.println("REQUEST: " + request.getRequestLine());
-			e.printStackTrace();
+			System.err.println(e.getLocalizedMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
