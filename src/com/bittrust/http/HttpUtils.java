@@ -101,6 +101,10 @@ public class HttpUtils {
 	 * @param cookieValue The value of the cookie.
 	 */
 	public static void setCookie(HttpResponse response, String host, String cookieName, String cookieValue) {
+		// null pointer check
+		if(response == null || host == null || cookieName == null || cookieValue == null)
+			return;
+		
 		// create a cookie
 		HttpCookie cookie = new HttpCookie(cookieName, cookieValue);
 
