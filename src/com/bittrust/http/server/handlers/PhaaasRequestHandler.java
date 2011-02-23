@@ -153,7 +153,6 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		
 		// see if we've saved this principal yet, if not then save it
 		if(sessionId == null) {
-			System.out.println("CREATING NEW SESSION");
 			sessionId = sessionStore.createSession(context.getPrincipal());
 		}
 
