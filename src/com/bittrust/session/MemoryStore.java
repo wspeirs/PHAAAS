@@ -37,7 +37,10 @@ public class MemoryStore implements SessionStore {
 
 	@Override
 	public Principal retrievePrincipal(String sessionID) {
-		return sessions.get(sessionID);
+		if(sessionID == null)
+			return null;
+		else
+			return sessions.get(sessionID);
 	}
 
 	@Override
