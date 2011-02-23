@@ -69,9 +69,14 @@ public class ProxyHttpRequestor implements HttpRequestor {
 		request.setHeader("Host", httpHost.getHostName());
 		
 		try {
+			long startTime = System.currentTimeMillis();
 			response = client.execute(httpHost, request, context);
+			long endTime = System.currentTimeMillis();
+			
+			System.out.println("TIME: " + (endTime - startTime) + "ms");
+			
 		} catch (ClientProtocolException e) {
-			System.err.println(e.getLocalizedMessage());
+			System.err.println("PROTOCOL ERROR: " + e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

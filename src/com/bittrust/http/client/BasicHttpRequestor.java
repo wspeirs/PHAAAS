@@ -65,8 +65,7 @@ public class BasicHttpRequestor implements HttpRequestor {
 			response = client.execute(httpHost, request, context);
 			
 		} catch (ClientProtocolException e) {
-			System.err.println("REQUEST: " + request.getRequestLine());
-			e.printStackTrace();
+			System.err.println("PROTOCOL ERROR: " + e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
