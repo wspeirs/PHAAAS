@@ -17,6 +17,7 @@ import com.bittrust.config.ServerConfig;
 import com.bittrust.config.ServiceConfig;
 import com.bittrust.http.client.BasicHttpRequestor;
 import com.bittrust.http.client.HttpRequestor;
+import com.bittrust.http.client.ProxyHttpRequestor;
 import com.bittrust.http.server.HttpServer;
 import com.bittrust.http.server.handlers.PhaaasRequestHandler;
 
@@ -108,7 +109,14 @@ public class Main {
 		
 		// go through each services and create a handler for it
 		for(ServiceConfig config:serviceConfigs) {
-			HttpRequestor requestor = new BasicHttpRequestor(config.getHost());
+			HttpRequestor requestor = null;
+			
+			// if the host is *, then we simply proxy the request
+			if(config.getHost().equals("*"))
+				requestor = new ProxyHttpRequestor();
+			else
+				requestor = new BasicHttpRequestor(config.getHost());
+				
 			PhaaasRequestHandler ch = new PhaaasRequestHandler(config, requestor);
 			
 			server.setHandler(config.getUrl(), ch);
