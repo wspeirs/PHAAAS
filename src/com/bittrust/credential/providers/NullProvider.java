@@ -4,6 +4,9 @@
 package com.bittrust.credential.providers;
 
 import java.util.HashMap;
+import java.util.UUID;
+
+import org.apache.http.HttpResponse;
 
 import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.credential.Credential;
@@ -14,9 +17,9 @@ import com.bittrust.session.SessionStore;
 
 /**
  * @class NullProvider
- * Checks for an existing session or creates a bogus credential.
+ * Checks for an existing principal or creates a bogus credential.
  */
-public class NullProvider implements CredentialProvider {
+public class NullProvider implements PrincipalProvider, CredentialProvider {
 
 	private String username;
 	
@@ -24,20 +27,57 @@ public class NullProvider implements CredentialProvider {
 		this.username = config.getParam("username");
 	}
 	
+	/**
+	 * Create a bogus credential using the username passed in the config.
+	 */
+	public CredentialProviderResult getCredentialFromHttpRequest(PhaaasContext context) {
+		// create & store a bogus credential
+		context.setCredential(new Credential(username, new HashMap<String, String>()));
+
+		return CredentialProviderResult.CREDENTIAL_FOUND;
+	}
+
 	@Override
-	public CredentialProviderResult getCredentialOrPrincipal(SessionStore sessionStore, PhaaasContext context) {
-		String sessionID = HttpUtils.getCookie(context.getHttpRequest(), SessionStore.SESSION_COOKIE);
+	public PrincipalProviderResult getPrincipalFromHttpRequest(PhaaasContext context, SessionStore sessionStore) {
+		String sessionID = HttpUtils.getCookie(context.getHttpRequest(), PrincipalProvider.SESSION_COOKIE);
+		
+		// if we don't have an ID, we don't have a principal
+		if(sessionID == null)
+			return PrincipalProviderResult.PRINCIPAL_NOT_FOUND;
+		
+		context.setSessionId(sessionID);	// save the session ID in the context
+		
+		// try to find the principal in the session store
 		Principal principal = sessionStore.retrievePrincipal(sessionID);
 		
-		// create a bogus credential
 		if(principal == null) {
-			context.setCredential(new Credential(username, new HashMap<String, String>()));
-			return CredentialProviderResult.CREDENTIAL_FOUND;
+			return PrincipalProviderResult.PRINCIPAL_NOT_FOUND;
 		} else { // create a bogus principal
 			context.setSessionId(sessionID);	// set the session ID
 			context.setPrincipal(principal);	// store the principal
-			return CredentialProviderResult.PRINCIPAL_FOUND;
+			return PrincipalProviderResult.PRINCIPAL_FOUND;
 		}
+	}
+
+	@Override
+	public void savePrincipalInSessionStore(PhaaasContext context, SessionStore sessionStore) {
+		sessionStore.storePrincipal(context.getSessionId(), context.getPrincipal());
+	}
+
+	@Override
+	public void setPrincipalInHttpResponse(PhaaasContext context) {
+		HttpResponse response = context.getHttpResponse();
+		String host = HttpUtils.getHeader(context.getHttpRequest(), "Host");
+		
+		HttpUtils.setCookie(response, host, PrincipalProvider.SESSION_COOKIE, context.getSessionId());
+	}
+
+	@Override
+	public void createPrincipal(PhaaasContext context) {
+		Credential credential = context.getCredential();
+		
+		context.setSessionId(UUID.randomUUID().toString());	// generate a random UUID as the ID
+		context.setPrincipal(new Principal(credential.getUsername())); // create the new Principal
 	}
 
 }

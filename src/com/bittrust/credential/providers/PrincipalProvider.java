@@ -10,6 +10,9 @@ import com.bittrust.session.SessionStore;
  * @interface PrincipalProvider
  */
 public interface PrincipalProvider {
+	
+	public static final String SESSION_COOKIE = "PHAAAS_ID"; /** The cookie used to store the session ID */
+	
 	/**
 	 * The result type for a CredentialProvider.
 	 * 
@@ -42,7 +45,13 @@ public interface PrincipalProvider {
 	 * @param context The PHAAAS context which contains the principal to store in the session store.
 	 * @param sessionStore The session store used to store the principal.
 	 */
-	public void setPrincipalInSessionStore(PhaaasContext context, SessionStore sessionStore);
+	public void savePrincipalInSessionStore(PhaaasContext context, SessionStore sessionStore);
+	
+	/**
+	 * Create a principal from the credential in the context.
+	 * @param context The PHAAAS context which holds the credential and resulting principal.
+	 */
+	public void createPrincipal(PhaaasContext context);
 	
 	/**
 	 * Store the principal in the context in the HttpResponse in the context.
