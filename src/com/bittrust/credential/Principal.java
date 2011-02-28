@@ -16,15 +16,15 @@ public class Principal {
 	
 	private String username;
 	private Set<String> groups;
-	private Map<String, Object> properties;
+	private Map<String, String> properties;
 	
 	public Principal(String username) {
 		this.username = username;
 		this.groups = new HashSet<String>();
-		this.properties = new HashMap<String, Object>();
+		this.properties = new HashMap<String, String>();
 	}
 	
-	public Principal(String username, Map<String, Object> properties) {
+	public Principal(String username, Map<String, String> properties) {
 		this.username = username;
 		this.groups = new HashSet<String>();
 		this.properties = properties;
@@ -76,7 +76,7 @@ public class Principal {
 	 * @param name The name of the property.
 	 * @param value The value of the property.
 	 */
-	public void setProperty(String name, Object value) {
+	public void setProperty(String name, String value) {
 		properties.put(name, value);
 	}
 	
