@@ -19,7 +19,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.SyncBasicHttpParams;
-import org.apache.http.protocol.HttpContext;
+
+import com.bittrust.http.PhaaasContext;
 
 
 /**
@@ -55,22 +56,19 @@ public class BasicHttpRequestor implements HttpRequestor {
 	}
 
 	@Override
-	public HttpResponse request(HttpRequest request, HttpContext context) {
-		HttpResponse response = null;
+	public void request(PhaaasContext context) {
+		HttpRequest request = context.getHttpRequest();
 		
 		// set the hostname
 		request.setHeader("Host", httpHost.getHostName());
 		
 		try {
-			response = client.execute(httpHost, request, context);
-			
+			context.setHttpResponse(client.execute(httpHost, request, context));
 		} catch (ClientProtocolException e) {
 			System.err.println("PROTOCOL ERROR: " + e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return response;
 	}
 
 }

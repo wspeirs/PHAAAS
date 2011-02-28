@@ -80,11 +80,13 @@ public class HttpUtils {
 	/**
 	 * Copies a response based on the server's response.
 	 * @param responseToClient The response to send to the client
-	 * @param responseFromServer The response from the server
+	 * @param context The context which contains the response.
 	 */
-	public static void copyResponse(HttpResponse responseToClient, HttpResponse responseFromServer) {
-		if(responseToClient == null || responseFromServer == null)
+	public static void copyResponse(HttpResponse responseToClient, PhaaasContext context) {
+		if(responseToClient == null || context == null || context.getHttpResponse() == null)
 			return;
+		
+		HttpResponse responseFromServer = context.getHttpResponse();
 		
 		// copy over the status line
 		responseToClient.setStatusLine(responseFromServer.getStatusLine());
@@ -100,10 +102,11 @@ public class HttpUtils {
 	 * Sets a cookie in a response.
 	 * @param response The response to set the cookie in.
 	 * @param host The hose to use in the cookie.
+	 * @param cookieAge The number of seconds the cookie should live for
 	 * @param cookieName The name of the cookie.
 	 * @param cookieValue The value of the cookie.
 	 */
-	public static void setCookie(HttpResponse response, String host, String cookieName, String cookieValue) {
+	public static void setCookie(HttpResponse response, String host, long cookieAge, String cookieName, String cookieValue) {
 		// null pointer check
 		if(response == null || host == null || cookieName == null || cookieValue == null)
 			return;
@@ -129,13 +132,17 @@ public class HttpUtils {
 		}
 
 		// setup the cookie
-		cookie.setMaxAge(900);	// 15 minutes
+		cookie.setMaxAge(cookieAge);
 		cookie.setPath("/");
 		cookie.setVersion(1);	// set to the RFC 2965/2109 version
 		
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
 	
+	/**
+	 * An enumeration of the basic status codes
+	 * @enum StatusCode
+	 */
 	public enum StatusCode {
 		UNAUTHENTICATED (401, "User Authentication Failed"),
 		UNAUTHORIZED (403, "User Authorization Failed"),

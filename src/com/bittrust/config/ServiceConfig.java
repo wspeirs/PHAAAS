@@ -14,6 +14,7 @@ public class ServiceConfig {
 	private String url = "*";
 	private String host = "*";
 	
+	private BasicModuleConfig principalConfig = null;
 	private BasicModuleConfig credentialConfig = null;
 	private BasicModuleConfig authenticationConfig = null;
 	private BasicModuleConfig authorizationConfig = null;
@@ -37,6 +38,14 @@ public class ServiceConfig {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+
+	public BasicModuleConfig getPrincipalConfig() {
+		return principalConfig;
+	}
+
+	public void setPrincipalConfig(BasicModuleConfig principalConfig) {
+		this.principalConfig = principalConfig;
 	}
 
 	public BasicModuleConfig getCredentialConfig() {

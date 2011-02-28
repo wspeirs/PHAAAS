@@ -19,7 +19,7 @@ public interface PrincipalProvider {
 	 * Determines the course of action for the RequestHander.
 	 * @enum CredentialProviderResult
 	 */
-	enum PrincipalProviderResult {
+	public enum PrincipalProviderResult {
 		PRINCIPAL_FOUND,		/** A principal was found. */
 		PRINCIPAL_NOT_FOUND,	/** A principal was <b>NOT</b> found. */
 		SEND_RESPONSE			/** A response should be sent to the client for more interaction. */

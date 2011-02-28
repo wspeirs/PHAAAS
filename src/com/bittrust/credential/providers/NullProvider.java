@@ -69,7 +69,8 @@ public class NullProvider implements PrincipalProvider, CredentialProvider {
 		HttpResponse response = context.getHttpResponse();
 		String host = HttpUtils.getHeader(context.getHttpRequest(), "Host");
 		
-		HttpUtils.setCookie(response, host, PrincipalProvider.SESSION_COOKIE, context.getSessionId());
+		// set the cookie for the current session only
+		HttpUtils.setCookie(response, host, -1, PrincipalProvider.SESSION_COOKIE, context.getSessionId());
 	}
 
 	@Override

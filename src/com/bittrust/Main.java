@@ -120,6 +120,7 @@ public class Main {
 			PhaaasRequestHandler ch = new PhaaasRequestHandler(config, requestor);
 			
 			server.setHandler(config.getUrl(), ch);
+			System.out.println("SETTING: " + requestor.getClass().getCanonicalName() + " FOR: " + config.getUrl());
 		}
 		
 		// start-up the server

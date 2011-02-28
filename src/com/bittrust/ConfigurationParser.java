@@ -30,6 +30,7 @@ public class ConfigurationParser {
 		addBasicModuleConfig("server/auditing", "setAuditConfig");
 		
 		// get defaults for all other modules
+		addBasicModuleConfig("server/principalProvider", "setPrincipalConfig");
 		addBasicModuleConfig("server/credentialProvider", "setCredentialConfig");
 		addBasicModuleConfig("server/authentication", "setAuthenticationConfig");
 		addBasicModuleConfig("server/authorization", "setAuthorizationConfig");
@@ -42,19 +43,12 @@ public class ConfigurationParser {
 		digester.addSetProperties("server/service");
 		digester.addSetNext("server/service", "addServiceConfig", "com.bittrust.config.ServiceConfig");
 		
-		// setup credential provider
+		// setup the per service modules
+		addBasicModuleConfig("server/service/principalProvider", "setPrincipalConfig");
 		addBasicModuleConfig("server/service/credentialProvider", "setCredentialConfig");
-		
-		// setup authentication
 		addBasicModuleConfig("server/service/authentication", "setAuthenticationConfig");
-		
-		// setup authorization
 		addBasicModuleConfig("server/service/authorization", "setAuthorizationConfig");
-
-		// setup request modifier
 		addBasicModuleConfig("server/service/requestModifier", "setRequestConfig");
-		
-		// setup response modifier
 		addBasicModuleConfig("server/service/responseModifier", "setResponseConfig");
 	}
 	

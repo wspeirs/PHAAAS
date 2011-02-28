@@ -25,6 +25,7 @@ public class ServerConfig {
 	
 	// default modules
 	// these are created for each individual service
+	private BasicModuleConfig principalConfig = null;
 	private BasicModuleConfig credentialConfig = null;
 	private BasicModuleConfig authenticationConfig = null;
 	private BasicModuleConfig authorizationConfig = null;
@@ -61,6 +62,9 @@ public class ServerConfig {
 			serviceConfig.setSessionStore(sessionStore);
 		
 		// add in the default modules if not specified
+		if(principalConfig != null && serviceConfig.getPrincipalConfig() == null)
+			serviceConfig.setPrincipalConfig(principalConfig);
+		
 		if(credentialConfig != null && serviceConfig.getCredentialConfig() == null)
 			serviceConfig.setCredentialConfig(credentialConfig);
 		
@@ -85,6 +89,14 @@ public class ServerConfig {
 
 	public SessionStore getSessionStore() {
 		return sessionStore;
+	}
+
+	public BasicModuleConfig getPrincipalConfig() {
+		return principalConfig;
+	}
+
+	public void setPrincipalConfig(BasicModuleConfig principalConfig) {
+		this.principalConfig = principalConfig;
 	}
 
 	public BasicModuleConfig getCredentialConfig() {

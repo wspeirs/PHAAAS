@@ -3,7 +3,6 @@
  */
 package com.bittrust.http;
 
-import org.apache.http.HttpResponse;
 
 /**
  * Used to modify the response from the server back to the client.
@@ -12,9 +11,8 @@ import org.apache.http.HttpResponse;
 public interface ResponseModifier {
 
 	/**
-	 * Modifies the response from the server as it's sent to the client.
+	 * Modifies the response in the context from the server as it's sent to the client.
 	 * @param context The context of the request.
-	 * @return The new response to send to the client.
 	 */
-	public HttpResponse modifyResponse(PhaaasContext context);
+	public void modifyResponse(PhaaasContext context);
 }

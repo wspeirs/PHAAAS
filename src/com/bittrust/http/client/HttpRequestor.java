@@ -3,9 +3,7 @@
  */
 package com.bittrust.http.client;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HttpContext;
+import com.bittrust.http.PhaaasContext;
 
 /**
  * @interface HttpRequestor
@@ -13,10 +11,8 @@ import org.apache.http.protocol.HttpContext;
 public interface HttpRequestor {
 
 	/**
-	 * Makes a request to the given host.
-	 * @param request The HTTP request to send to the host.
+	 * Makes the request found in the context and set the response in the context.
 	 * @param context The context for which the HTTP request should operate in.
-	 * @return The response from the server.
 	 */
-	public HttpResponse request(HttpRequest request, HttpContext context);
+	public void request(PhaaasContext context);
 }

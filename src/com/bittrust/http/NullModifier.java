@@ -3,9 +3,6 @@
  */
 package com.bittrust.http;
 
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-
 import com.bittrust.config.BasicModuleConfig;
 
 /**
@@ -17,13 +14,11 @@ public class NullModifier implements RequestModifier, ResponseModifier {
 	}
 	
 	@Override
-	public HttpRequest modifyRequest(PhaaasContext context) {
-		return context.getHttpRequest();
+	public void modifyRequest(PhaaasContext context) {
 	}
 
 	@Override
-	public HttpResponse modifyResponse(PhaaasContext context) {
-		return context.getHttpResponse();
+	public void modifyResponse(PhaaasContext context) {
 	}
 
 }

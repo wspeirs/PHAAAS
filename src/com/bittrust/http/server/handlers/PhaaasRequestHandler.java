@@ -20,6 +20,8 @@ import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.config.ServiceConfig;
 import com.bittrust.credential.providers.CredentialProvider;
 import com.bittrust.credential.providers.CredentialProvider.CredentialProviderResult;
+import com.bittrust.credential.providers.PrincipalProvider;
+import com.bittrust.credential.providers.PrincipalProvider.PrincipalProviderResult;
 import com.bittrust.http.HttpUtils;
 import com.bittrust.http.PhaaasContext;
 import com.bittrust.http.RequestModifier;
@@ -35,6 +37,7 @@ import com.bittrust.session.SessionStore;
 public class PhaaasRequestHandler implements HttpRequestHandler {
 	
 	// modules
+	private PrincipalProvider principalProvider;
 	private CredentialProvider credentialProvider;
 	private Authenticator authenticator;
 	private Authorizer authorizer;
@@ -53,6 +56,11 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		this.httpRequestor = requestor;
 		
 		try {
+			// setup the principal provider
+			@SuppressWarnings("unchecked")
+			Class<PrincipalProvider> princClass = (Class<PrincipalProvider>) Class.forName(serviceConfig.getPrincipalConfig().getClassName());
+			this.principalProvider = (PrincipalProvider)princClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getPrincipalConfig());
+
 			// setup the credential provider
 			@SuppressWarnings("unchecked")
 			Class<CredentialProvider> credClass = (Class<CredentialProvider>) Class.forName(serviceConfig.getCredentialConfig().getClassName());
@@ -113,82 +121,97 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		// create the PhaaasContext
 		PhaaasContext context = new PhaaasContext(httpContext, request);
 		
-		// get the credentials from the request
-		CredentialProviderResult credRes = credentialProvider.getCredentialOrPrincipal(sessionStore, context);
+		// attempt to get a principal from the request
+		PrincipalProviderResult ppRes = principalProvider.getPrincipalFromHttpRequest(context, sessionStore);
 		
-		boolean isAuthorized = false;
-		
-		// based upon the result we do different things
-		switch(credRes) {
-		case CREDENTIAL_FOUND:	// creds found, continue with auth
-			auditor.credentialFound(log, context.getCredential());	// log the fact that we got the creds
-			
-			// try to authenticate the user
-			if(!authenticator.authenticate(context)) {
-				HttpResponse ret = context.getHttpResponse();
-				
-				auditor.authenticationFailed(log, ret);
-				auditor.writeLog(log);
-				
-				HttpUtils.copyResponse(response, ret);	// copy the response to send to the client
-				return;
-			}
-			
-		// if the auth works, we fall-through here
-		case PRINCIPAL_FOUND:	// we have a principal from a previous authentication or from the authenticator
-			auditor.principalFound(log, context.getPrincipal());
-			isAuthorized = authorizer.authorize(context);
-			break;
-		case SEND_RESPONSE:		// we need to send a response back to the client
-			HttpUtils.copyResponse(response, context.getHttpResponse());
+		// see if we need to send the response back
+		if(PrincipalProviderResult.SEND_RESPONSE == ppRes) {
+			// copy over the response
+			HttpUtils.copyResponse(response, context);
+			 
+			// log the response
 			auditor.serverResponse(log, response);
 			auditor.writeLog(log);
-			return;
-		}
-		
-		// at this point we have a good principal so we should make a session
-		// granted the user might not be authorized, but they did authenticate
-		String sessionId = context.getSessionId();
-		String host = context.getHttpRequest().getFirstHeader("Host").toString();
-		
-		// see if we've saved this principal yet, if not then save it
-		if(sessionId == null) {
-			sessionId = sessionStore.createSession(context.getPrincipal());
-		}
-
-		// not authorized so copy the response and send it to the client
-		if(!isAuthorized) {
-			HttpResponse unauthResponse = context.getHttpResponse();
 			
+			return; // we're done here
+		}
+		
+		// see if we need to look for credentials
+		if(PrincipalProviderResult.PRINCIPAL_NOT_FOUND == ppRes) {
+			// attempt to get a credential from the HTTP request
+			CredentialProviderResult credRes = credentialProvider.getCredentialFromHttpRequest(context);
+
+			// see if we need to send the response back OR we couldn't find a credential
+			if(CredentialProviderResult.SEND_RESPONSE == credRes ||
+			   CredentialProviderResult.CREDENTIAL_NOT_FOUND == credRes) {
+				// copy over the response
+				HttpUtils.copyResponse(response, context);
+				 
+				// log the response
+				auditor.serverResponse(log, response);
+				auditor.writeLog(log);
+				
+				return; // we're done here
+			}
+			
+			// log the fact that we got the creds
+			auditor.credentialFound(log, context.getCredential());
+			
+			// we have a valid credential, see if it authenticates
+			if(!authenticator.authenticate(context)) {
+				// copy over the response
+				HttpUtils.copyResponse(response, context);
+				 
+				// log the response
+				auditor.authenticationFailed(log, response);
+				auditor.writeLog(log);
+				
+				return; // we're done here
+			}
+			
+			// see if the authenticator created the principal for us
+			if(context.getPrincipal() == null)
+				principalProvider.createPrincipal(context);
+
+			// save our principal in the session store
+			principalProvider.savePrincipalInSessionStore(context, sessionStore);
+		} else {	// we found a principal
+			auditor.principalFound(log, context.getPrincipal());
+		}
+		
+		//
+		// By here we have a valid principal in the context
+		//
+		
+		// check to see if the principal is authorized
+		if(!authorizer.authorize(context)) {
+			// save the principal in the response even if not authorized, authenticated
+			principalProvider.setPrincipalInHttpResponse(context);
+			 
 			// log that authz failed
-			auditor.authorizationFailed(log, unauthResponse);
+			auditor.authorizationFailed(log, context.getHttpResponse());
 			auditor.writeLog(log);
-
-			// set the session cookie here
-			HttpUtils.setCookie(unauthResponse, host, SessionStore.SESSION_COOKIE, sessionId);
 			
-			// copy the response over
-			HttpUtils.copyResponse(response, unauthResponse);
-			return;	// this will return the response to the client
+			return; // we're all done here
 		}
-		
+			
 		// modify the request to send to the server
-		HttpRequest modifiedRequest = requestModifier.modifyRequest(context);
+		requestModifier.modifyRequest(context);
 		
 		// send the request to the server
-		context.setHttpResponse(httpRequestor.request(modifiedRequest, context));
+		httpRequestor.request(context);
 		
 		// modify the response
-		 HttpResponse responseForClient = responseModifier.modifyResponse(context);
+		responseModifier.modifyResponse(context);
+		
+		// save the principal in the response
+		principalProvider.setPrincipalInHttpResponse(context);
 		 
-		 // insert the session cookie
-		HttpUtils.setCookie(responseForClient, host, SessionStore.SESSION_COOKIE, sessionId);
+		// copy over the response
+		HttpUtils.copyResponse(response, context);
 		 
-		 // copy over the response
-		 HttpUtils.copyResponse(response, responseForClient);
-		 
-		 // log the response
-		 auditor.serverResponse(log, response);
-		 auditor.writeLog(log);
+		// log the response
+		auditor.serverResponse(log, response);
+		auditor.writeLog(log);
 	}
 }

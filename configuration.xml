@@ -7,6 +7,11 @@
     <auditing className="com.bittrust.auditing.ApacheStyle"/>
 
     <!-- Default modules for all services -->
+    
+    <principalProvider className="com.bittrust.credential.providers.NullProvider">
+    	<param name="username">jsmith</param>
+    </principalProvider>
+    
     <credentialProvider className="com.bittrust.credential.providers.NullProvider">
     	<param name="username">jsmith</param>
     </credentialProvider>
@@ -23,6 +28,6 @@
     
     <responseModifier className="com.bittrust.http.NullModifier"/>
 
-    <service host="*" url="*"/>
+    <service host="services-staging.factset.com" url="/*"/>
 
 </server>

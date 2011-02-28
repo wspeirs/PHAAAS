@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.conn.params.ConnManagerPNames;
@@ -20,9 +19,9 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.SyncBasicHttpParams;
-import org.apache.http.protocol.HttpContext;
 
 import com.bittrust.http.HttpUtils;
+import com.bittrust.http.PhaaasContext;
 
 /**
  * @class ProxyHttpRequestor
@@ -50,8 +49,8 @@ public class ProxyHttpRequestor implements HttpRequestor {
 	}
 	
 	@Override
-	public HttpResponse request(HttpRequest request, HttpContext context) {
-		HttpResponse response = null;
+	public void request(PhaaasContext context) {
+		HttpRequest request = context.getHttpRequest();
 		String hostName = HttpUtils.getHeader(request, "Host");
 		HttpHost httpHost = null;
 		
@@ -70,7 +69,7 @@ public class ProxyHttpRequestor implements HttpRequestor {
 		
 		try {
 			long startTime = System.currentTimeMillis();
-			response = client.execute(httpHost, request, context);
+			context.setHttpResponse(client.execute(httpHost, request, context));
 			long endTime = System.currentTimeMillis();
 			
 			System.out.println("TIME: " + (endTime - startTime) + "ms");
@@ -80,8 +79,6 @@ public class ProxyHttpRequestor implements HttpRequestor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return response;
 	}
 
 }
