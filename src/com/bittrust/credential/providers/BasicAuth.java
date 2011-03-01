@@ -13,11 +13,9 @@ import org.apache.http.HttpResponse;
 
 import com.bittrust.config.BasicModuleConfig;
 import com.bittrust.credential.Credential;
-import com.bittrust.credential.Principal;
 import com.bittrust.http.HttpUtils;
 import com.bittrust.http.HttpUtils.StatusCode;
 import com.bittrust.http.PhaaasContext;
-import com.bittrust.session.SessionStore;
 
 /**
  * @class BasicAuth
