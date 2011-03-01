@@ -3,6 +3,7 @@
  */
 package com.bittrust.config;
 
+import com.bittrust.PluginsLoader;
 import com.bittrust.auditing.Auditor;
 import com.bittrust.session.SessionStore;
 
@@ -11,6 +12,8 @@ import com.bittrust.session.SessionStore;
  */
 public class ServiceConfig {
 
+	private PluginsLoader loader;
+	
 	private String url = "*";
 	private String host = "*";
 	
@@ -23,6 +26,14 @@ public class ServiceConfig {
 	
 	private Auditor auditor = null;
 	private SessionStore sessionStore = null;
+
+	public PluginsLoader getLoader() {
+		return loader;
+	}
+
+	public void setLoader(PluginsLoader loader) {
+		this.loader = loader;
+	}
 
 	public String getUrl() {
 		return url;

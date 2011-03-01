@@ -6,6 +6,7 @@ package com.bittrust.config;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import com.bittrust.PluginsLoader;
 import com.bittrust.auditing.Auditor;
 import com.bittrust.session.SessionStore;
 
@@ -14,9 +15,11 @@ import com.bittrust.session.SessionStore;
  */
 public class ServerConfig {
 	
+	// server specific settings
 	private short port = 80;
 	private int threadCount = 10;
 	private ArrayList<ServiceConfig> serviceConfigs = new ArrayList<ServiceConfig>();
+	private PluginsLoader loader;
 	
 	// global modules
 	// these are shared across all services, unless one is specified for the service
@@ -32,6 +35,9 @@ public class ServerConfig {
 	private BasicModuleConfig requestConfig = null;
 	private BasicModuleConfig responseConfig = null;
 
+	public ServerConfig(PluginsLoader pl) {
+		loader = pl;
+	}
 	
 	public void setPort(short port) {
 		this.port = port;
@@ -83,6 +89,10 @@ public class ServerConfig {
 		this.serviceConfigs.add(serviceConfig);
 	}
 	
+	public PluginsLoader getLoader() {
+		return loader;
+	}
+
 	public Auditor getAuditor() {
 		return auditor;
 	}
@@ -146,7 +156,7 @@ public class ServerConfig {
 	public void setSessionConfig(BasicModuleConfig sessionConfig) {
 		try {
 			@SuppressWarnings("unchecked")
-			Class<SessionStore> sessionClass = (Class<SessionStore>) Class.forName(sessionConfig.getClassName());
+			Class<SessionStore> sessionClass = (Class<SessionStore>) loader.loadClass(sessionConfig.getClassName());
 			this.sessionStore = (SessionStore)sessionClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(sessionConfig);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -168,7 +178,7 @@ public class ServerConfig {
 	public void setAuditConfig(BasicModuleConfig auditConfig) {
 		try {
 			@SuppressWarnings("unchecked")
-			Class<Auditor> auditClass = (Class<Auditor>) Class.forName(auditConfig.getClassName());
+			Class<Auditor> auditClass = (Class<Auditor>) loader.loadClass(auditConfig.getClassName());
 			this.auditor = (Auditor)auditClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(auditConfig);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

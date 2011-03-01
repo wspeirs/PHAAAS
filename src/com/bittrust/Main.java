@@ -50,20 +50,18 @@ public class Main {
 		if(commandLine.hasOption("c")) {
 			configFile = new File(commandLine.getOptionValue("c"));
 		}
-		
+
+		// set the plugins loader
+		PluginsLoader pl = new PluginsLoader(new File(commandLine.getOptionValue("plugins-dir")));
+
 		// parse out the configuration file
-		ConfigurationParser cp = new ConfigurationParser();
-		ServerConfig sc = cp.parse(configFile);
-		
-		// make sure we have a valid configuration
-		if(sc == null) {
-			System.err.println("Invalid configuration file");
-			return;
-		}
+		ServerConfig sc = new ServerConfig(pl);
+		new ConfigurationParser(sc).parse(configFile);
 		
 		// see if the user just wants to check the config file
 		if(commandLine.hasOption("check")) {
 			System.out.println("*** SERVER ***");
+			System.out.println("   PLUGIN DIR: " + pl.getPluginDirectory());
 			System.out.println("    HTTP PORT: " + sc.getPort());
 			System.out.println(" THREAD COUNT: " + sc.getThreadCount());
 			
@@ -110,6 +108,8 @@ public class Main {
 		// go through each services and create a handler for it
 		for(ServiceConfig config:serviceConfigs) {
 			HttpRequestor requestor = null;
+			
+			config.setLoader(pl);	// set the plugins loader
 			
 			// if the host is *, then we simply proxy the request
 			if(config.getHost().equals("*"))

@@ -18,11 +18,14 @@ public class ConfigurationParser {
 	
 	private Digester digester = new Digester();
 	
-	public ConfigurationParser() {
+	public ConfigurationParser(ServerConfig serverConfig) {
 		digester.setValidating(false);
 		
+		// push on the initial object
+		digester.push(serverConfig);
+		
 		// setup the digester for the server
-		digester.addObjectCreate("server", "com.bittrust.config.ServerConfig");
+//		digester.addObjectCreate("server", "com.bittrust.config.ServerConfig");
 		digester.addSetProperties("server");
 		
 		// get the global session and auditor configs

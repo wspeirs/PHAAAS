@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
+import com.bittrust.PluginsLoader;
 import com.bittrust.auditing.Auditor;
 import com.bittrust.authentication.Authenticator;
 import com.bittrust.authorization.Authorizer;
@@ -54,36 +55,39 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		this.auditor = serviceConfig.getAuditor();
 		this.sessionStore = serviceConfig.getSessionStore();
 		this.httpRequestor = requestor;
-		
+
+		// plugins loader
+		PluginsLoader loader = serviceConfig.getLoader();
+
 		try {
 			// setup the principal provider
 			@SuppressWarnings("unchecked")
-			Class<PrincipalProvider> princClass = (Class<PrincipalProvider>) Class.forName(serviceConfig.getPrincipalConfig().getClassName());
+			Class<PrincipalProvider> princClass = (Class<PrincipalProvider>) loader.loadClass(serviceConfig.getPrincipalConfig().getClassName());
 			this.principalProvider = (PrincipalProvider)princClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getPrincipalConfig());
 
 			// setup the credential provider
 			@SuppressWarnings("unchecked")
-			Class<CredentialProvider> credClass = (Class<CredentialProvider>) Class.forName(serviceConfig.getCredentialConfig().getClassName());
+			Class<CredentialProvider> credClass = (Class<CredentialProvider>) loader.loadClass(serviceConfig.getCredentialConfig().getClassName());
 			this.credentialProvider = (CredentialProvider)credClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getCredentialConfig());
 
 			// setup the authenticator
 			@SuppressWarnings("unchecked")
-			Class<Authenticator> authClass = (Class<Authenticator>) Class.forName(serviceConfig.getAuthenticationConfig().getClassName());
+			Class<Authenticator> authClass = (Class<Authenticator>) loader.loadClass(serviceConfig.getAuthenticationConfig().getClassName());
 			this.authenticator = (Authenticator)authClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthenticationConfig());
 
 			// setup the authorizer
 			@SuppressWarnings("unchecked")
-			Class<Authorizer> authzClass = (Class<Authorizer>) Class.forName(serviceConfig.getAuthorizationConfig().getClassName());
+			Class<Authorizer> authzClass = (Class<Authorizer>) loader.loadClass(serviceConfig.getAuthorizationConfig().getClassName());
 			this.authorizer = (Authorizer)authzClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getAuthorizationConfig());
 
 			// setup the request modifier
 			@SuppressWarnings("unchecked")
-			Class<RequestModifier> requestClass = (Class<RequestModifier>) Class.forName(serviceConfig.getRequestConfig().getClassName());
+			Class<RequestModifier> requestClass = (Class<RequestModifier>) loader.loadClass(serviceConfig.getRequestConfig().getClassName());
 			this.requestModifier = (RequestModifier)requestClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getRequestConfig());
 
 			// setup the response modifier
 			@SuppressWarnings("unchecked")
-			Class<ResponseModifier> responseClass = (Class<ResponseModifier>) Class.forName(serviceConfig.getResponseConfig().getClassName());
+			Class<ResponseModifier> responseClass = (Class<ResponseModifier>) loader.loadClass(serviceConfig.getResponseConfig().getClassName());
 			this.responseModifier = (ResponseModifier)responseClass.getConstructor(new Class[] { BasicModuleConfig.class }).newInstance(serviceConfig.getResponseConfig());
 
 		} catch (ClassNotFoundException e) {
