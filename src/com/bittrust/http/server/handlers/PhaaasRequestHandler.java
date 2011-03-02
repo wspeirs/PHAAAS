@@ -24,6 +24,7 @@ import com.bittrust.credential.providers.CredentialProvider.CredentialProviderRe
 import com.bittrust.credential.providers.PrincipalProvider;
 import com.bittrust.credential.providers.PrincipalProvider.PrincipalProviderResult;
 import com.bittrust.http.HttpUtils;
+import com.bittrust.http.HttpUtils.StatusCode;
 import com.bittrust.http.PhaaasContext;
 import com.bittrust.http.RequestModifier;
 import com.bittrust.http.ResponseModifier;
@@ -131,7 +132,7 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		// see if we need to send the response back
 		if(PrincipalProviderResult.SEND_RESPONSE == ppRes) {
 			// copy over the response
-			HttpUtils.copyResponse(response, context);
+			HttpUtils.copyResponse(response, context.getHttpResponse());
 			 
 			// log the response
 			auditor.serverResponse(log, response);
@@ -146,12 +147,21 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 			CredentialProviderResult credRes = credentialProvider.getCredentialFromHttpRequest(context);
 
 			// see if we need to send the response back OR we couldn't find a credential
-			if(CredentialProviderResult.SEND_RESPONSE == credRes ||
-			   CredentialProviderResult.CREDENTIAL_NOT_FOUND == credRes) {
+			if(CredentialProviderResult.SEND_RESPONSE == credRes) {
 				// copy over the response
-				HttpUtils.copyResponse(response, context);
+				HttpUtils.copyResponse(response, context.getHttpResponse());
 				 
 				// log the response
+				auditor.serverResponse(log, response);
+				auditor.writeLog(log);
+				
+				return; // we're done here
+			} else if(CredentialProviderResult.CREDENTIAL_NOT_FOUND == credRes) {
+				HttpResponse res = HttpUtils.generateResponse(StatusCode.UNAUTHENTICATED, "Credential Not Found");
+				
+				// copy over the response
+				HttpUtils.copyResponse(response, res);
+
 				auditor.serverResponse(log, response);
 				auditor.writeLog(log);
 				
@@ -164,7 +174,7 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 			// we have a valid credential, see if it authenticates
 			if(!authenticator.authenticate(context)) {
 				// copy over the response
-				HttpUtils.copyResponse(response, context);
+				HttpUtils.copyResponse(response, context.getHttpResponse());
 				 
 				// log the response
 				auditor.authenticationFailed(log, response);
@@ -212,7 +222,7 @@ public class PhaaasRequestHandler implements HttpRequestHandler {
 		principalProvider.setPrincipalInHttpResponse(context);
 		 
 		// copy over the response
-		HttpUtils.copyResponse(response, context);
+		HttpUtils.copyResponse(response, context.getHttpResponse());
 		 
 		// log the response
 		auditor.serverResponse(log, response);

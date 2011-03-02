@@ -82,11 +82,9 @@ public class HttpUtils {
 	 * @param responseToClient The response to send to the client
 	 * @param context The context which contains the response.
 	 */
-	public static void copyResponse(HttpResponse responseToClient, PhaaasContext context) {
-		if(responseToClient == null || context == null || context.getHttpResponse() == null)
+	public static void copyResponse(HttpResponse responseToClient, HttpResponse responseFromServer) {
+		if(responseToClient == null || responseFromServer == null)
 			return;
-		
-		HttpResponse responseFromServer = context.getHttpResponse();
 		
 		// copy over the status line
 		responseToClient.setStatusLine(responseFromServer.getStatusLine());
