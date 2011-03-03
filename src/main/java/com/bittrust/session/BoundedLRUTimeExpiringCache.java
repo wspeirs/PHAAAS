@@ -109,7 +109,6 @@ public class BoundedLRUTimeExpiringCache<K, V> {
 		
 		private boolean isRunning = true;
 
-		@Override
 		public void run() {
 			// this thread simply runs forever
 			while(isRunning) {

@@ -31,7 +31,6 @@ public class ApacheStyle implements Auditor {
 			catch (IOException e) {	e.printStackTrace(); }
 	}
 	
-	@Override
 	public StringBuilder receivedConnection(InetAddress address) {
 		StringBuilder sb =  new StringBuilder(address.getHostAddress().toString());
 		
@@ -40,16 +39,13 @@ public class ApacheStyle implements Auditor {
 		return sb;
 	}
 
-	@Override
 	public void receivedRequest(StringBuilder sb, HttpRequest request) {
 		requestLine = request.getRequestLine().toString();
 	}
 
-	@Override
 	public void credentialFound(StringBuilder sb, Credential cred) {
 	}
 
-	@Override
 	public void principalFound(StringBuilder sb, Principal principal) {
 		sb.append(principal.getUsername());
 		sb.append(" [");
@@ -59,17 +55,14 @@ public class ApacheStyle implements Auditor {
 		sb.append("\" ");
 	}
 
-	@Override
 	public void authenticationFailed(StringBuilder sb, HttpResponse response) {
 		sb.append("AUTHENTICATION FAILED");
 	}
 
-	@Override
 	public void authorizationFailed(StringBuilder sb, HttpResponse response) {
 		sb.append("AUTHORIZATION FAILED");
 	}
 
-	@Override
 	public void serverResponse(StringBuilder sb, HttpResponse response) {
 		sb.append(response.getStatusLine().getStatusCode());
 		sb.append(" ");
@@ -83,7 +76,6 @@ public class ApacheStyle implements Auditor {
 			sb.append(entity.getContentLength());
 	}
 
-	@Override
 	public void writeLog(StringBuilder sb) {
 		if(fileWriter == null) {	// just write to STDOUT
 			System.out.println(sb.toString());
@@ -97,12 +89,10 @@ public class ApacheStyle implements Auditor {
 		}
 	}
 
-	@Override
 	public File getLogLocation() {
 		return null;
 	}
 
-	@Override
 	public void setLogLocation(File file) {
 	}
 }

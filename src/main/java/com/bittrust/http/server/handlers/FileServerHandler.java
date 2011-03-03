@@ -17,7 +17,6 @@ import org.apache.http.protocol.HttpRequestHandler;
  */
 public class FileServerHandler implements HttpRequestHandler {
 
-	@Override
 	public void handle(HttpRequest request, HttpResponse response, HttpContext context)	throws HttpException, IOException {
 		StringEntity entity = new StringEntity("File Server");
 		

@@ -48,7 +48,6 @@ public class ProxyHttpRequestor implements HttpRequestor {
 
 	}
 	
-	@Override
 	public void request(PhaaasContext context) {
 		HttpRequest request = context.getHttpRequest();
 		String hostName = HttpUtils.getHeader(request, "Host");

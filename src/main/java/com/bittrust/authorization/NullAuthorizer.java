@@ -31,7 +31,6 @@ public class NullAuthorizer implements Authorizer {
 		this.result = result;
 	}
 	
-	@Override
 	public boolean authorize(PhaaasContext context) {
 		if(result == false) {
 			HttpResponse response = HttpUtils.generateResponse(StatusCode.UNAUTHORIZED, "Authorization Failed");

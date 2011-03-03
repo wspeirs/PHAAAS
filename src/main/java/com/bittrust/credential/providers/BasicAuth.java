@@ -27,7 +27,6 @@ public class BasicAuth implements CredentialProvider {
 		realm = config.getParam("realm");
 	}
 	
-	@Override
 	public CredentialProviderResult getCredentialFromHttpRequest(PhaaasContext context) {
 		HttpRequest request = context.getHttpRequest();
 		Header authHeader = null;

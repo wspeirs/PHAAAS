@@ -13,11 +13,9 @@ public class NullModifier implements RequestModifier, ResponseModifier {
 	public NullModifier(BasicModuleConfig config) {
 	}
 	
-	@Override
 	public void modifyRequest(PhaaasContext context) {
 	}
 
-	@Override
 	public void modifyResponse(PhaaasContext context) {
 	}
 

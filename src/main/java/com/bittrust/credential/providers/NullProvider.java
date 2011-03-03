@@ -37,7 +37,6 @@ public class NullProvider implements PrincipalProvider, CredentialProvider {
 		return CredentialProviderResult.CREDENTIAL_FOUND;
 	}
 
-	@Override
 	public PrincipalProviderResult getPrincipalFromHttpRequest(PhaaasContext context, SessionStore sessionStore) {
 		String sessionID = HttpUtils.getCookie(context.getHttpRequest(), PrincipalProvider.SESSION_COOKIE);
 		
@@ -59,12 +58,10 @@ public class NullProvider implements PrincipalProvider, CredentialProvider {
 		}
 	}
 
-	@Override
 	public void savePrincipalInSessionStore(PhaaasContext context, SessionStore sessionStore) {
 		sessionStore.storePrincipal(context.getSessionId(), context.getPrincipal());
 	}
 
-	@Override
 	public void setPrincipalInHttpResponse(PhaaasContext context) {
 		HttpResponse response = context.getHttpResponse();
 		String host = HttpUtils.getHeader(context.getHttpRequest(), "Host");
@@ -73,7 +70,6 @@ public class NullProvider implements PrincipalProvider, CredentialProvider {
 		HttpUtils.setCookie(response, host, -1, PrincipalProvider.SESSION_COOKIE, context.getSessionId());
 	}
 
-	@Override
 	public void createPrincipal(PhaaasContext context) {
 		Credential credential = context.getCredential();
 		

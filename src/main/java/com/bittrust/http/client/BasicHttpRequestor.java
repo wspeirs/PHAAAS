@@ -54,7 +54,6 @@ public class BasicHttpRequestor implements HttpRequestor {
 		this.client = new DefaultHttpClient(this.connManager, params);
 	}
 
-	@Override
 	public void request(PhaaasContext context) {
 		HttpRequest request = context.getHttpRequest();
 		

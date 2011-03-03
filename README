@@ -12,9 +12,9 @@ Building
 It is highly recommended to do development using Eclipse. The .classpath file is
 included in the git repository for this reason.
 
-You can build PHAAAS by using the included ant script:
+You can build PHAAAS by using the included pom.xml:
 	'mvn compile' - compiles all the source
 	'mvn assembly:assembly' - builds a standalone JAR file
 
-	For now you can run the stand alone like this:
+For now you can run the stand alone like this:
 	java -jar target/PHAAAS-0.0.1-SNAPSHOT-jar-with-dependencies.jar -h

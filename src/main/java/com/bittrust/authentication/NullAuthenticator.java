@@ -32,7 +32,6 @@ public class NullAuthenticator implements Authenticator {
 		this.result = result;
 	}
 
-	@Override
 	public boolean authenticate(PhaaasContext context) {
 		if(result) {
 			context.setPrincipal(new Principal("test"));

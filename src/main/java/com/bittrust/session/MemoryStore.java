@@ -21,7 +21,6 @@ public class MemoryStore implements SessionStore {
 		;	// we don't do anything with this config
 	}
 	
-	@Override
 	public synchronized String createSession(Principal principal) {
 		String id = UUID.randomUUID().toString();	// generate a random UUID as the ID
 		
@@ -30,12 +29,10 @@ public class MemoryStore implements SessionStore {
 		return id;	// return the ID
 	}
 
-	@Override
 	public synchronized void storePrincipal(String sessionID, Principal principal) {
 		sessions.put(sessionID, principal);
 	}
 
-	@Override
 	public Principal retrievePrincipal(String sessionID) {
 		if(sessionID == null)
 			return null;
@@ -43,12 +40,10 @@ public class MemoryStore implements SessionStore {
 			return sessions.get(sessionID);
 	}
 
-	@Override
 	public synchronized void deleteSession(String sessionID) {
 		sessions.remove(sessionID);
 	}
 
-	@Override
 	public boolean validateSession(String sessionID) {
 		return sessions.containsKey(sessionID);
 	}

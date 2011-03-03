@@ -55,7 +55,6 @@ public class ActiveDirectory implements Authenticator {
 			System.out.println("UNAUTHED");
 	}
 
-	@Override
 	public boolean authenticate(PhaaasContext context) {
 		Credential credential = context.getCredential();
 		String username = credential.getUsername();
