@@ -15,3 +15,6 @@ included in the git repository for this reason.
 You can build PHAAAS by using the included ant script:
 	'mvn compile' - compiles all the source
 	'mvn assembly:assembly' - builds a standalone JAR file
+
+	For now you can run the stand alone like this:
+	java -jar target/PHAAAS-0.0.1-SNAPSHOT-jar-with-dependencies.jar -h
